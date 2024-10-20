@@ -43,23 +43,22 @@ RUN apt-get update \
 # Set capabilities
 RUN setcap "cap_net_bind_service=+ep" /usr/bin/php8.2
 
-
 # Set default for WWWGROUP if not provided
 ARG WWWGROUP=1000  # Default value; replace with your preferred ID
 
 # Create user and group
-# Create user and group if they don't already exist
 RUN groupadd --force -g $WWWGROUP sail || true \
     && id -u sail || useradd -ms /bin/bash --no-user-group -g $WWWGROUP -u 1337 sail
 
-# Copy configuration files
-COPY php.ini /etc/php/8.2/cli/conf.d/99-sail.ini
-COPY start-container /usr/local/bin/start-container
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-RUN chmod +x /usr/local/bin/start-container
+# Remove these lines if the files are not needed
+# COPY php.ini /etc/php/8.2/cli/conf.d/99-sail.ini
+# COPY start-container /usr/local/bin/start-container
+# COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+# RUN chmod +x /usr/local/bin/start-container
 
 # Expose the application port
 EXPOSE 8000
 
-# Set the entry point
-ENTRYPOINT ["start-container"]
+# Set a different entry point or command if needed
+# ENTRYPOINT ["start-container"]
+CMD ["php", "-S", "0.0.0.0:8000", "-t", "public"]  # Adjust as needed
