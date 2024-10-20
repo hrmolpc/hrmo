@@ -55,6 +55,7 @@ RUN groupadd --force -g $WWWGROUP sail || true \
 # COPY start-container /usr/local/bin/start-container
 # COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 # RUN chmod +x /usr/local/bin/start-container
+RUN chmod +x /usr/bin/php
 
 # Expose the application port
 EXPOSE 8000
