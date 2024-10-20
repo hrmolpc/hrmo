@@ -43,9 +43,14 @@ RUN apt-get update \
 # Set capabilities
 RUN setcap "cap_net_bind_service=+ep" /usr/bin/php8.2
 
+
+# Set default for WWWGROUP if not provided
+ARG WWWGROUP=1000  # Default value; replace with your preferred ID
+
 # Create user and group
-RUN groupadd --force -g $WWWGROUP sail \
-    && useradd -ms /bin/bash --no-user-group -g $WWWGROUP -u 1337 sail
+# Create user and group if they don't already exist
+RUN groupadd --force -g $WWWGROUP sail || true \
+    && id -u sail || useradd -ms /bin/bash --no-user-group -g $WWWGROUP -u 1337 sail
 
 # Copy configuration files
 COPY start-container /usr/local/bin/start-container
