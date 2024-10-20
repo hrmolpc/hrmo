@@ -1,0 +1,7 @@
+version: 1
+services:
+  - type: web
+    name: HRMS
+    env: docker
+    autoDeploy: true
+    dockerComposeFilePath: docker-compose.yml
