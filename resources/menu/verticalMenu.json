@@ -1,0 +1,66 @@
+{
+  "menu": [
+    {
+      "url": "/dashboard",
+      "name": "Dashboard",
+      "icon": "menu-icon tf-icons ti ti-dashboard",
+      "slug": "dashboard",
+      "role": ["AM", "CC", "CR", "HR"]
+    },
+    {
+      "menuHeader": "Request Type",
+      "role": ["HR", "CC"]
+    },
+    {
+      "url": "/coe",
+      "name": "Certifcate of Employment",
+      "icon": "menu-icon tf-icons ti ti-file",
+      "slug": "coe",
+      "role": ["HR"]
+    },
+    {
+      "url": "/leave",
+      "name": "Leave",
+      "icon": "menu-icon tf-icons ti ti-plane",
+      "slug": "leave",
+      "role": ["HR"]
+    },
+    {
+      "url": "/payslip",
+      "name": "Payslip",
+      "icon": "menu-icon tf-icons ti ti-coin",
+      "slug": "payslip",
+      "role": ["HR"]
+    },
+    {
+      "url": "/serviceRecords",
+      "name": "Service Records",
+      "icon": "menu-icon tf-icons ti ti-devices",
+      "slug": "serviceRecords",
+      "role": ["HR"]
+    },
+    {
+      "menuHeader": "Others",
+      "role": ["HR", "CC"]
+    },
+    {
+      "name": "Settings",
+      "icon": "menu-icon tf-icons ti ti-adjustments-alt",
+      "slug": "settings",
+      "role": ["Admin"],
+      "submenu": [
+        {
+          "url": "settings/users",
+          "name": "Users",
+          "slug": "settings-users"
+        },
+        {
+          "url": "settings/roles",
+          "name": "Reports",
+          "slug": "settings-roles"
+        }
+      ]
+    }
+   
+  ]
+}
