@@ -19,7 +19,7 @@ This concise solution promotes effective workforce management and informed decis
 1. Navigate to the project folder:
    
     ```bash
-    cd HRMS
+    cd hrmo
 
 2. Install dependencies using Composer:
    
