@@ -2,7 +2,6 @@
 
 namespace App\Livewire\HumanResource\Structure;
 
-use App\Models\Contract;
 use App\Models\Employee;
 use Livewire\Component;
 use Livewire\WithPagination;

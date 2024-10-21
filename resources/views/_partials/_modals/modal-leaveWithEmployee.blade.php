@@ -34,22 +34,14 @@
                 <label class="form-label">{{ __('Employee') }}</label>
                 <select wire:model='selectedEmployeeId' class="select2 form-control" id="select2selectedEmployeeId">
                   <option value=""></option>
-                  @forelse ($activeEmployees as $timeline)
-                    <option value="{{ $timeline->employee->id }}">{{ $timeline->employee->id . ' - ' . $timeline->employee->full_name }}</option>
-                  @empty
-                    <option value="0" disabled>{{__('No Employees Found!') }}</option>
-                  @endforelse
+ 
                 </select>
               </div>
               <div wire:ignore class="col-lg-6 col-12">
                 <label class="form-label w-100">{{ __('Type') }}</label>
                 <select wire:model='newLeaveInfo.LeaveId' name="updated_name" class="select2 form-control" id="select2LeaveId">
                   <option value=""></option>
-                  @forelse ($leaveTypes as $leaveType)
-                    <option value="{{ $leaveType->id }}">{{ $leaveType->name }}</option>
-                  @empty
-                    <option value="0" disabled>{{ __('No Leave Found!') }}</option>
-                  @endforelse
+    
                 </select>
               </div>
             </div>

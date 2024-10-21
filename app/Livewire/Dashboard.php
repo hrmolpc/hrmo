@@ -58,18 +58,13 @@ class Dashboard extends Component
     public function mount()
     {
         $user = Employee::find(Auth::user()->employee_id);
-        $center = Center::find(
-            $user
-                ->timelines()
-                ->where('end_date', null)
-                ->first()->center_id
-        );
-        $this->activeEmployees = $center->activeEmployees();
+   
+      
 
         $this->selectedEmployeeId = Auth::user()->employee_id;
         $this->employeePhoto = $user->profile_photo_path;
 
-        $this->leaveTypes = Leave::all();
+ 
 
         try {
             $this->accountBalance = $this->CheckAccountBalance();
@@ -85,18 +80,10 @@ class Dashboard extends Component
 
     public function render()
     {
-        $this->messagesStatus = Message::selectRaw(
-            'SUM(CASE WHEN is_sent = 1 THEN 1 ELSE 0 END) AS sent, SUM(CASE WHEN is_sent = 0 THEN 1 ELSE 0 END) AS unsent'
-        )->first();
-        $this->messagesStatus = [
-            'sent' => Number::format($this->messagesStatus['sent'] != null ? $this->messagesStatus['sent'] : 0),
-            'unsent' => Number::format($this->messagesStatus['unsent'] != null ? $this->messagesStatus['unsent'] : 0),
-        ];
+     
+      
 
-        $this->leaveRecords = EmployeeLeave::where('created_by', Auth::user()->name)
-            ->whereDate('created_at', Carbon::today()->toDate())
-            ->orderBy('created_at')
-            ->get();
+      
 
         return view('livewire.dashboard');
     }

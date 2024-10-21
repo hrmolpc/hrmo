@@ -28,11 +28,7 @@
               <label class="form-label w-100">{{ __('Type') }}</label>
               <select wire:model='newLeaveInfo.LeaveId' name="updated_name" class="select2 form-control" id="select2LeaveId">
                 <option value=""></option>
-                @forelse ($leaveTypes as $leaveType)
-                  <option value="{{ $leaveType->id }}">{{ $leaveType->name }}</option>
-                @empty
-                  <option value="0" disabled>{{ __('No Leave Found!') }}</option>
-                @endforelse
+ 
               </select>
             </div>
             <div class="col-md-3 col-12">

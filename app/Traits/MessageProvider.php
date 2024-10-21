@@ -1,5 +1,5 @@
 <?php
-
+//Delete
 namespace App\Traits;
 
 use App\Models\Setting;

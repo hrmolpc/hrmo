@@ -15,15 +15,12 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         $this->call([
-            ContractsSeeder::class,
+          
             EmployeesSeeder::class,
 
             AdminUserSeeder::class,
 
-            CenterSeeder::class,
-            DepartmentSeeder::class,
-            PositionSeeder::class,
-            TimelineSeeder::class,
+  
         ]);
 
         if (file_exists('database/seeders/SettingsSeeder.php')) {

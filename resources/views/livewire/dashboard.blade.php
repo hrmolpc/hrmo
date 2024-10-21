@@ -149,7 +149,7 @@
               <div class="d-flex align-items-center">
                 <div class="badge rounded-pill bg-label-secondary me-3 p-2"><i class="ti ti-users ti-sm"></i></div>
                 <div class="card-info">
-                  <h5 class="mb-0">{{ count($activeEmployees) }}</h5>
+                  <h5 class="mb-0">1</h5>
                   <small>{{ __('Active Employees') }}</small>
                 </div>
               </div>
