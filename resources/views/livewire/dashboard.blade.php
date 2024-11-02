@@ -340,7 +340,7 @@
         updateClock(); // Initial call to display clock immediately
   </script>
 
-<<style>
+<style>
   .calendar {
     border: 1px solid #dee2e6;
     border-radius: 0.5rem;

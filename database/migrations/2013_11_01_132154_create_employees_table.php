@@ -4,48 +4,50 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+class CreateEmployeesTable extends Migration
 {
     /**
      * Run the migrations.
+     *
+     * @return void
      */
-    public function up(): void
+    public function up()
     {
         Schema::create('employees', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('contract_id')->constrained();
-            $table->string('first_name');
-            $table->string('father_name');
-            $table->string('last_name');
-            $table->string('mother_name');
-            $table->string('birth_and_place');
-            $table->string('national_number')->unique();
-            $table->string('mobile_number')->unique();
-            $table->string('degree');
-            $table->boolean('gender');
-            $table->string('address');
-            $table->longText('notes')->nullable();
-            $table
-                ->integer('max_leave_allowed')
-                ->length(2)
-                ->default(0);
-            $table->time('delay_counter')->default('00:00:00.00');
-            $table->time('hourly_counter')->default('00:00:00.00');
-            $table->boolean('is_active')->default(1);
-            $table->string('profile_photo_path');
-            $table->string('created_by');
-            $table->string('updated_by');
-            $table->string('deleted_by')->nullable();
+            $table->string('first_name')->nullable();
+            $table->string('last_name')->nullable();
+            $table->string('gender')->nullable();
+            $table->string('email')->unique()->nullable();
+            $table->string('mobile_number')->nullable();
+            $table->date('birthday')->nullable();
+            $table->string('nationality')->nullable();
+            $table->string('address')->nullable();
+            $table->string('employee_id')->unique()->nullable();
+            $table->string('employment_status')->nullable();
+            $table->date('start_date')->nullable();
+            $table->string('position')->nullable();
+            $table->string('department')->nullable();
+            $table->string('emergency_contact_name')->nullable();
+            $table->string('emergency_contact_number')->nullable();
+            $table->string('relation_to_employee')->nullable();
+            $table->string('emergency_contact_address')->nullable();
+            $table->boolean('is_active')->default(1)->nullable(); // New field
+            $table->string('created_by')->nullable(); // New field
+            $table->string('updated_by')->nullable(); // New field
+            $table->string('deleted_by')->nullable(); // New field
             $table->timestamps();
-            $table->softDeletes();
+            $table->softDeletes(); // Enable soft deletes
         });
     }
 
     /**
      * Reverse the migrations.
+     *
+     * @return void
      */
-    public function down(): void
+    public function down()
     {
         Schema::dropIfExists('employees');
     }
-};
+}

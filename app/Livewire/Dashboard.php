@@ -53,7 +53,6 @@ class Dashboard extends Component
 
     public $fromDateLimit;
 
-    public $employeePhoto = 'profile-photos/.default-photo.jpg';
 
     public function mount()
     {
@@ -62,20 +61,12 @@ class Dashboard extends Component
       
 
         $this->selectedEmployeeId = Auth::user()->employee_id;
-        $this->employeePhoto = $user->profile_photo_path;
+    
 
  
 
-        try {
-            $this->accountBalance = $this->CheckAccountBalance();
-        } catch (Throwable $th) {
-            //
-        }
-
-        $this->fromDateLimit = Carbon::now()
-            ->subDays(30)
-            ->format('Y-m-d');
-        $this->changelogs = Changelog::latest()->get();
+   
+ 
     }
 
     public function render()
@@ -92,161 +83,34 @@ class Dashboard extends Component
     {
         $employee = Employee::find($this->selectedEmployeeId);
 
-        if ($employee) {
-            $this->employeePhoto = $employee->profile_photo_path;
-        } else {
+    
             $this->reset('employeePhoto');
-        }
+    
     }
 
-    public function sendPendingMessages()
-    {
-        if ($this->messagesStatus['unsent'] != 0) {
-            sendPendingMessages::dispatch();
-            session()->flash('info', __('Let\'s go! Messages on their way!'));
-        } else {
-            $this->dispatch('toastr', type: 'info' /* , title: 'Done!' */, message: __('Everything has sent already!'));
-        }
-    }
+ 
 
-    public function showCreateLeaveModal()
-    {
-        $this->dispatch('clearSelect2Values');
-        $this->reset('newLeaveInfo', 'isEdit');
-    }
-
+ 
     public function createLeave()
     {
-        EmployeeLeave::firstOrCreate([
-            'employee_id' => $this->selectedEmployeeId,
-            'leave_id' => $this->newLeaveInfo['LeaveId'],
-            'from_date' => $this->newLeaveInfo['fromDate'],
-            'to_date' => $this->newLeaveInfo['toDate'],
-            'start_at' => $this->newLeaveInfo['startAt'],
-            'end_at' => $this->newLeaveInfo['endAt'],
-            'note' => $this->newLeaveInfo['note'],
-        ]);
+   
 
-        session()->flash('success', __('Success, record created successfully!'));
-        $this->dispatch('scrollToTop');
-
-        $this->dispatch('closeModal', elementId: '#leaveModal');
-        $this->dispatch('toastr', type: 'success' /* , title: 'Done!' */, message: __('Going Well!'));
+ 
     }
 
     public function showEditLeaveModal($id)
     {
-        $this->reset('newLeaveInfo');
-
-        $this->isEdit = true;
-        $this->employeeLeaveId = $id;
-
-        $record = DB::table('employee_leave')
-            ->where('id', $this->employeeLeaveId)
-            ->first();
-
-        $this->selectedEmployeeId = $record->employee_id;
-        $this->newLeaveInfo = [
-            'LeaveId' => $record->leave_id,
-            'fromDate' => $record->from_date,
-            'toDate' => $record->to_date,
-            'startAt' => $record->start_at,
-            'endAt' => $record->end_at,
-            'note' => $record->note,
-        ];
-
-        $this->dispatch('setSelect2Values', employeeId: $this->selectedEmployeeId, leaveId: $record->leave_id);
+  
     }
 
     public function updateLeave()
     {
-        EmployeeLeave::find($this->employeeLeaveId)->update([
-            'employee_id' => $this->selectedEmployeeId,
-            'leave_id' => $this->newLeaveInfo['LeaveId'],
-            'from_date' => $this->newLeaveInfo['fromDate'],
-            'to_date' => $this->newLeaveInfo['toDate'],
-            'start_at' => $this->newLeaveInfo['startAt'],
-            'end_at' => $this->newLeaveInfo['endAt'],
-            'note' => $this->newLeaveInfo['note'],
-        ]);
-
-        session()->flash('success', __('Success, record updated successfully!'));
-        $this->dispatch('scrollToTop');
-
-        $this->dispatch('closeModal', elementId: '#leaveModal');
-        $this->dispatch('toastr', type: 'success' /* , title: 'Done!' */, message: __('Going Well!'));
-
-        $this->reset('isEdit', 'newLeaveInfo');
+ 
     }
 
     public function submitLeave()
     {
-        $this->validate(
-            [
-                'selectedEmployeeId' => 'required',
-                'newLeaveInfo.LeaveId' => 'required',
-                'newLeaveInfo.fromDate' => 'required|date',
-                'newLeaveInfo.toDate' => 'required|date',
-            ],
-            null,
-            [
-                'selectedEmployeeId' => 'Employee',
-                'newLeaveInfo.LeaveId' => 'Type',
-                'newLeaveInfo.fromDate' => 'From Date',
-                'newLeaveInfo.toDate' => 'To Date',
-            ]
-        );
-
-        if (
-            substr($this->newLeaveInfo['LeaveId'], 1, 1) == 1 &&
-            ($this->newLeaveInfo['startAt'] != null || $this->newLeaveInfo['endAt'] != null)
-        ) {
-            session()->flash('error', __('Can\'t add daily leave with time!'));
-            $this->dispatch('closeModal', elementId: '#leaveModal');
-            $this->dispatch('toastr', type: 'error' /* , title: 'Done!' */, message: __('Requires Attention!'));
-
-            return;
-        }
-
-        if (
-            substr($this->newLeaveInfo['LeaveId'], 1, 1) == 2 &&
-            ($this->newLeaveInfo['startAt'] == null || $this->newLeaveInfo['endAt'] == null)
-        ) {
-            session()->flash('error', __('Can\'t add hourly leave without time!'));
-            $this->dispatch('closeModal', elementId: '#leaveModal');
-            $this->dispatch('toastr', type: 'error' /* , title: 'Done!' */, message: __('Requires Attention!'));
-
-            return;
-        }
-
-        if (
-            substr($this->newLeaveInfo['LeaveId'], 1, 1) == 2 &&
-            $this->newLeaveInfo['fromDate'] != $this->newLeaveInfo['toDate']
-        ) {
-            session()->flash('error', __('Hourly leave must be on the same day'));
-            $this->dispatch('closeModal', elementId: '#leaveModal');
-            $this->dispatch('toastr', type: 'error' /* , title: 'Done!' */, message: __('Requires Attention!'));
-
-            return;
-        }
-
-        if ($this->newLeaveInfo['fromDate'] > $this->newLeaveInfo['toDate']) {
-            session()->flash('error', __('Check the dates entered. "From Date" can not be greater than "To Date"'));
-            $this->dispatch('closeModal', elementId: '#leaveModal');
-            $this->dispatch('toastr', type: 'error' /* , title: 'Done!' */, message: __('Requires Attention!'));
-
-            return;
-        }
-
-        if ($this->newLeaveInfo['startAt'] > $this->newLeaveInfo['endAt']) {
-            session()->flash('error', __('Check the times entered. "Start At" can not be greater than "End To"'));
-            $this->dispatch('closeModal', elementId: '#leaveModal');
-            $this->dispatch('toastr', type: 'error' /* , title: 'Done!' */, message: __('Requires Attention!'));
-
-            return;
-        }
-
-        $this->isEdit ? $this->updateLeave() : $this->createLeave();
+   
     }
 
     public function confirmDestroyLeave($id)

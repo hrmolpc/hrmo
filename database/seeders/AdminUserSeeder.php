@@ -14,7 +14,6 @@ class AdminUserSeeder extends Seeder
             'employee_id' => '1',
             'email' => 'admin@demo.com',
             'password' => bcrypt('admin'),
-            'profile_photo_path' => 'profile-photos/.default-photo.jpg',
         ]);
     }
 }

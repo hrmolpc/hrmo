@@ -80,8 +80,7 @@
                     </div> --}}
                     <div class="avatar avatar-lg me-2">
                       <a href="{{ route('structure-employees-info', $employee->id) }}">
-                        <img src="{{ Storage::disk("public")->exists($employee->profile_photo_path) ? Storage::disk("public")->url($employee->profile_photo_path) : Storage::disk("public")->url('profile-photos/.default-photo.jpg') }}" alt="Avatar" class="rounded">
-                      </a>
+                    </a>
                     </div>
                     <div class="user-profile-info mx-3">
                       <a href="{{ route('structure-employees-info', $employee->id) }}">

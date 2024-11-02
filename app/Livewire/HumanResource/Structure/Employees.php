@@ -10,31 +10,16 @@ class Employees extends Component
 {
     use WithPagination;
 
-    // 👉 Variables
     public $searchTerm = null;
-
-    public $contracts;
-
-    public $employee;
-
     public $employeeInfo = [];
-
     public $isEdit = false;
-
     public $confirmedId;
 
-    // 👉 Mount
-    public function mount()
-    {
-        $this->contracts = Contract::all();
-    }
-
-    // 👉 Render
     public function render()
     {
-        $employees = Employee::where('id', 'like', '%'.$this->searchTerm.'%')
-            ->orWhere('first_name', 'like', '%'.$this->searchTerm.'%')
-            ->orWhere('last_name', 'like', '%'.$this->searchTerm.'%')
+        $employees = Employee::where('id', 'like', '%' . $this->searchTerm . '%')
+            ->orWhere('first_name', 'like', '%' . $this->searchTerm . '%')
+            ->orWhere('last_name', 'like', '%' . $this->searchTerm . '%')
             ->paginate(20);
 
         return view('livewire.human-resource.structure.employees', [
@@ -42,112 +27,99 @@ class Employees extends Component
         ]);
     }
 
-    // 👉 Submit employee
     public function submitEmployee()
     {
         $this->validate([
-            'employeeInfo.id' => 'required',
-            'employeeInfo.contractId' => 'required',
-            'employeeInfo.firstName' => 'required',
-            'employeeInfo.fatherName' => 'required',
-            'employeeInfo.lastName' => 'required',
-            'employeeInfo.motherName' => 'required',
-            'employeeInfo.birthAndPlace' => 'required',
-            'employeeInfo.nationalNumber' => 'required|min:11|max:11',
-            'employeeInfo.mobileNumber' => 'required|min:9|max:9|regex:/^[1-9][0-9]*$/',
-            'employeeInfo.degree' => 'required',
-            'employeeInfo.gender' => 'required',
-            'employeeInfo.address' => 'required',
+            'employeeInfo.first_name' => 'required|string|max:255',
+            'employeeInfo.last_name' => 'required|string|max:255',
+            'employeeInfo.gender' => 'required|string',
+            'employeeInfo.email' => 'required|email|unique:employees,email,' . ($this->isEdit ? $this->employeeInfo['id'] : 'NULL'),
+            'employeeInfo.mobile_number' => 'required|string|max:15',
+            'employeeInfo.birthday' => 'required|date',
+            'employeeInfo.nationality' => 'required|string|max:100',
+            'employeeInfo.address' => 'required|string|max:255',
+            'employeeInfo.emergency_contact_name' => 'required|string|max:255',
+            'employeeInfo.emergency_contact_number' => 'required|string|max:15',
+            'employeeInfo.relation_to_employee' => 'required|string|max:50',
+            'employeeInfo.emergency_contact_address' => 'required|string|max:255',
         ]);
 
         $this->isEdit ? $this->editEmployee() : $this->addEmployee();
     }
 
-    // 👉 Store employee
     public function showCreateEmployeeModal()
     {
         $this->reset('isEdit', 'employeeInfo');
+        $this->employeeInfo['gender'] = 'other'; // Default value for gender
     }
+
+    protected function generateUniqueEmployeeId()
+    {
+        do {
+            // Generate a random ID (customize as needed)
+            $randomId = 'EMP' . strtoupper(bin2hex(random_bytes(3))); // Generates a string like EMP1A2B3
+        } while (Employee::where('employee_id', $randomId)->exists());
+    
+        return $randomId;
+    }
+    
 
     public function addEmployee()
     {
-        $createdEmployee = Employee::create([
-            'id' => $this->employeeInfo['id'],
-            'contract_id' => $this->employeeInfo['contractId'],
-            'first_name' => $this->employeeInfo['firstName'],
-            'father_name' => $this->employeeInfo['fatherName'],
-            'last_name' => $this->employeeInfo['lastName'],
-            'mother_name' => $this->employeeInfo['motherName'],
-            'birth_and_place' => $this->employeeInfo['birthAndPlace'],
-            'national_number' => $this->employeeInfo['nationalNumber'],
-            'mobile_number' => $this->employeeInfo['mobileNumber'],
-            'degree' => $this->employeeInfo['degree'],
-            'gender' => $this->employeeInfo['gender'],
-            'address' => $this->employeeInfo['address'],
-            'notes' => isset($this->employeeInfo['notes']) ? $this->employeeInfo['notes'] : null,
-        ]);
-
-        $this->dispatch('closeModal', elementId: '#employeeModal');
-        $this->dispatch('toastr', type: 'success' /* , title: 'Done!' */, message: __('Going Well!'));
-
-        session()->flash('openTimelineModal', true);
-
-        return redirect()->route('structure-employees-info', ['id' => $createdEmployee->id]);
+        try {
+            // Generate employee_id if not editing an existing record
+            if (!$this->isEdit) {
+                $this->employeeInfo['employee_id'] = $this->generateUniqueEmployeeId();
+            }
+    
+            // Create the employee record
+            Employee::create($this->employeeInfo);
+    
+            $this->dispatch('closeModal', elementId: '#employeeModal');
+            $this->dispatch('toastr', type: 'success', message: __('Employee added successfully!'));
+        } catch (\Exception $e) {
+            $this->dispatch('toastr', type: 'error', message: __('Failed to add employee: ' . $e->getMessage()));
+        } finally {
+            $this->reset(['employeeInfo']);
+        }
     }
+    
 
-    // 👉 Update employee
+    
+    
+
     public function showEditEmployeeModal(Employee $employee)
     {
         $this->isEdit = true;
-
-        $this->employee = $employee;
-
-        $this->employeeInfo['id'] = $employee->id;
-        $this->employeeInfo['contractId'] = $employee->contract_id;
-        $this->employeeInfo['firstName'] = $employee->first_name;
-        $this->employeeInfo['fatherName'] = $employee->father_name;
-        $this->employeeInfo['lastName'] = $employee->last_name;
-        $this->employeeInfo['motherName'] = $employee->mother_name;
-        $this->employeeInfo['birthAndPlace'] = $employee->birth_and_place;
-        $this->employeeInfo['nationalNumber'] = $employee->national_number;
-        $this->employeeInfo['mobileNumber'] = $employee->mobile_number;
-        $this->employeeInfo['degree'] = $employee->degree;
-        $this->employeeInfo['gender'] = $employee->gender;
-        $this->employeeInfo['address'] = $employee->address;
-        $this->employeeInfo['notes'] = $employee->notes;
+        $this->employeeInfo = $employee->only([
+            'id', 'contract_id', 'first_name', 'last_name', 'gender',
+            'email', 'mobile_number', 'birthday', 'nationality',
+            'address', 'emergency_contact_name', 'emergency_contact_number',
+            'relation_to_employee', 'emergency_contact_address'
+        ]);
     }
 
     public function editEmployee()
     {
-        $this->employee->update([
-            'id' => $this->employeeInfo['id'],
-            'contract_id' => $this->employeeInfo['contractId'],
-            'first_name' => $this->employeeInfo['firstName'],
-            'father_name' => $this->employeeInfo['fatherName'],
-            'last_name' => $this->employeeInfo['lastName'],
-            'mother_name' => $this->employeeInfo['motherName'],
-            'birth_and_place' => $this->employeeInfo['birthAndPlace'],
-            'national_number' => $this->employeeInfo['nationalNumber'],
-            'mobile_number' => $this->employeeInfo['mobileNumber'],
-            'degree' => $this->employeeInfo['degree'],
-            'gender' => $this->employeeInfo['gender'],
-            'address' => $this->employeeInfo['address'],
-            'notes' => isset($this->employeeInfo['notes']) ? $this->employeeInfo['notes'] : null,
-        ]);
-
+        $employee = Employee::find($this->employeeInfo['id']);
+        $employee->update($this->employeeInfo);
         $this->dispatch('closeModal', elementId: '#employeeModal');
-        $this->dispatch('toastr', type: 'success' /* , title: 'Done!' */, message: __('Going Well!'));
+        $this->dispatch('toastr', type: 'success', message: __('Employee updated successfully!'));
+        $this->reset('employeeInfo');
     }
 
-    // 👉 Delete employee
     public function confirmDeleteEmployee($id)
     {
         $this->confirmedId = $id;
     }
 
-    public function deleteEmployee(Employee $employee)
+    public function deleteEmployee()
     {
-        $employee->delete();
-        $this->dispatch('toastr', type: 'success' /* , title: 'Done!' */, message: __('Going Well!'));
+        $employee = Employee::find($this->confirmedId);
+        if ($employee) {
+            $employee->delete();
+            $this->dispatch('toastr', type: 'success', message: __('Employee deleted successfully!'));
+        }
+        $this->confirmedId = null; // Reset after deletion
     }
 }

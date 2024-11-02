@@ -15,14 +15,10 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->foreignId('employee_id')->nullable()->constrained();
-            $table->string('mobile')->nullable()->unique();
-            $table->timestamp('mobile_verified_at')->nullable();
             $table->string('email')->nullable()->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
             $table->rememberToken();
-            // $table->foreignId('current_team_id')->nullable();
-            $table->string('profile_photo_path', 2048)->nullable();
             $table->string('created_by')->nullable();
             $table->string('updated_by')->nullable();
             $table->string('deleted_by')->nullable();

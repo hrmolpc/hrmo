@@ -23,14 +23,10 @@ class DatabaseSeeder extends Seeder
   
         ]);
 
-        if (file_exists('database/seeders/SettingsSeeder.php')) {
-            $this->call([
-                SettingsSeeder::class,
-            ]);
-        }
 
-        // Create role
-        $adminRole = Role::create(['name' => 'Admin']);
+
+        $adminRole = Role::firstOrCreate(['name' => 'Admin']);
+        $userRole = Role::firstOrCreate(['name' => 'Employee']);
 
         // Assign role
         $admin = User::find(1);
