@@ -5,39 +5,47 @@
       "name": "Dashboard",
       "icon": "menu-icon tf-icons ti ti-dashboard",
       "slug": "dashboard",
-      "role": ["Employee", "AM", "CC", "CR", "HR"]
+      "role": ["Admin"]
     },
     {
       "menuHeader": "Request Type",
-      "role": ["HR", "CC"]
+      "role": ["Admin"]
     },
     {
       "url": "/coe",
       "name": "Certifcate of Employment",
       "icon": "menu-icon tf-icons ti ti-file",
       "slug": "coe",
-      "role": ["HR"]
+      "role": ["Admin"]
     },
     {
       "url": "/leave",
       "name": "Leave",
       "icon": "menu-icon tf-icons ti ti-plane",
       "slug": "leave",
-      "role": ["HR"]
+      "role": ["Admin"]
     },
     {
       "url": "/payslip",
       "name": "Payslip",
       "icon": "menu-icon tf-icons ti ti-coin",
       "slug": "payslip",
-      "role": ["HR"]
+      "role": ["Admin"]
     },
     {
       "url": "/serviceRecords",
       "name": "Service Records",
       "icon": "menu-icon tf-icons ti ti-devices",
       "slug": "serviceRecords",
-      "role": ["HR"]
+      "role": ["Admin"]
+    },
+
+    {
+      "url": "/employee",
+      "name": "My Requests",
+      "icon": "menu-icon tf-icons ti ti-devices",
+      "slug": "serviceRecords",
+      "role": ["Employee"]
     }
 
  

@@ -59,7 +59,10 @@
       </div>
   
     </div>
-    
+
+   
+
+
     
     <div class="card-body h-50 d-flex flex-column">
       <div class="calendar flex-grow-1">
@@ -316,7 +319,7 @@
   </div>
 
   {{-- Modals --}}
-  @include('_partials/_modals/modal-leaveWithEmployee')
+
 
   @push('custom-scripts')
   <script>

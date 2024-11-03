@@ -22,6 +22,13 @@ class AuthServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->registerPolicies();
+        Gate::define('admin-access', function ($user) {
+            return $user->role->name === 'Admin';
+        });
+    
+        Gate::define('employee-access', function ($user) {
+            return $user->role->name === 'Employee';
+        });
 
         // Implicitly grant "Admin" role all permission checks using can()
         Gate::before(function ($user, $ability) {

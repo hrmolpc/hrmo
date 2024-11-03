@@ -38,7 +38,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])->group(function () {
     // 👉 Dashboard
-    Route::group(['middleware' => ['role:Employee|Admin|AM|CC|CR|HR']], function () {
+    Route::group(['middleware' => ['role:Admin|AM|CC|CR|HR']], function () {
         Route::redirect('/', '/dashboard');
         Route::get('/dashboard', Dashboard::class)->name('dashboard');
     });
@@ -46,7 +46,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
  
  
 
-    Route::group(['middleware' => ['role:Employee|Admin|HR']], function () {
+    Route::group(['middleware' => ['role:Admin|HR']], function () {
         Route::prefix('structure')->group(function () {
           
        
@@ -55,26 +55,24 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
         });
     });
 
-    Route::group(['middleware' => ['role:Employee|Admin|HR']], function () {
+    Route::group(['middleware' => ['role:Admin|HR']], function () {
         Route::get('/coe', COE::class)->name('coe');
         Route::get('/leave', Leave::class)->name('leave');
         Route::get('/payslip', Payslip::class)->name('payslip');
         Route::get('/serviceRecords', ServiceRecords::class)->name('serviceRecords');
+
+  
+    });
+
+    Route::group(['middleware' => ['role:Employee']], function () {
         Route::get('/employee', Employee::class)->name('employee');
   
     });
     
+    
 
     Route::group(['middleware' => ['role:Employee|Admin|HR']], function () {
         Route::get('/statistics', Statistics::class)->name('statistics');
-    });
-
-    Route::group(['middleware' => ['role:Employee|Admin']], function () {
-        Route::prefix('settings')->group(function () {
-             
-            Route::get('/roles', ComingSoon::class)->name('settings-roles');
-            Route::get('/permissions', ComingSoon::class)->name('settings-permissions');
-        });
     });
 
  
