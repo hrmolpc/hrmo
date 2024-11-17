@@ -3,60 +3,92 @@
 namespace App\Livewire;
 
 use App\Models\Employee;
-use App\Models\EmployeeLeave;
-use App\Models\Leave;
+use App\Models\Request;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
+use Carbon\Carbon;
 
 class Dashboard extends Component
+
+
 {
-    public $accountBalance = ['status' => 400, 'balance' => '---', 'is_active' => '---'];
-    public $messagesStatus = ['sent' => 0, 'unsent' => 0];
-    public $confirmedId;
-    public $leaveRecords = [];
+    public $requestTypeCounter = [];
+    public $employmentStatusCount = [];
+    public $inactiveEmploymentStatusCount = [];
+    public $requests = [];
     public $userRole;
-    public $selectedEmployeeId;
+    
 
     public function mount()
     {
-        // Get the authenticated user's employee data
         $user = Auth::user();
 
-        if ($user) {
-            $employee = Employee::find($user->employee_id);
-            $this->selectedEmployeeId = $user->employee_id;
+        
+   
+        $this->countEmploymentStatus();
 
-            // Check the role and assign it to the variable
-            $this->userRole = $employee->role->name ?? 'guest'; // Default to 'guest' if no role
-        }
+        $this->requestTypeCount();
+        $this->countInactiveEmploymentStatus();
+        $this->getAllRequests(); // Fetch a
     }
+
+    public function countEmploymentStatus()
+    {
+        $this->employmentStatusCount = Employee::query()
+            ->where('is_active', 1) // Only include active employees
+            ->select('employment_status', \DB::raw('COUNT(*) as count'))
+            ->groupBy('employment_status')
+            ->pluck('count', 'employment_status')
+            ->toArray();
+    }
+
+    public function countInactiveEmploymentStatus()
+    {
+        $this->inactiveEmploymentStatusCount = Employee::query()
+            ->where('is_active', 0) // Only include active employees
+            ->select('employment_status', \DB::raw('COUNT(*) as count'))
+            ->groupBy('employment_status')
+            ->pluck('count', 'employment_status')
+            ->toArray();
+    }
+    
+
+    public function requestTypeCount()
+    {
+        $this->requestTypeCounter = Request::query()
+            ->select('type', \DB::raw('COUNT(*) as count'))
+            ->groupBy('type')
+            ->pluck('count', 'type')
+            ->toArray();
+    }
+    public function getAllRequests()
+    {
+        // Set the date to 2024-11-17 (testing with a past date)
+        $dateToFilter = Carbon::createFromFormat('Y-m-d', '2024-11-17', 'Asia/Manila');
+    
+        // Get the start and end of that day in Asia/Manila timezone
+        $startOfDay = $dateToFilter->startOfDay();
+        $endOfDay = $dateToFilter->endOfDay();
+    
+        // Log the values to see what the start and end of the day look like
+       // dd($startOfDay, $endOfDay);
+    
+        // Fetch requests created on 2024-11-17 using the range
+        $this->requests = Request::query()
+            //->whereBetween('created_at', [$startOfDay, $endOfDay])
+            ->get();
+    }
+    
+    
 
     public function render()
     {
         return view('livewire.dashboard', [
+            'employmentStatusCount' => $this->employmentStatusCount,
             'userRole' => $this->userRole,
+            'requestTypeCounter' => $this->requestTypeCounter,
+            'inactiveEmploymentStatusCount' => $this->inactiveEmploymentStatusCount,
+            'requests' => $this->requests,
         ]);
-    }
-
-    public function confirmDestroyLeave($id)
-    {
-        $this->confirmedId = $id;
-    }
-
-    public function destroyLeave()
-    {
-        EmployeeLeave::find($this->confirmedId)->delete();
-        $this->dispatch('toastr', type: 'success', message: __('Going Well!'));
-        $this->confirmedId = null;
-    }
-
-    public function getEmployeeName($id)
-    {
-        return Employee::find($id)->FullName;
-    }
-
-    public function getLeaveType($id)
-    {
-        return Leave::find($id)->name;
     }
 }
