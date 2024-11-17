@@ -1,5 +1,4 @@
 <?php
-
 namespace App\Livewire\HumanResource;
 
 use Livewire\Component;
@@ -8,6 +7,12 @@ class Leave extends Component
 {
     public $leaveRecords = [];
     public $confirmedId = null;
+    public $leaveRequest = [
+        'id' => null,
+        'employee_id' => null,
+        'request_date' => '',
+        'status' => '',
+    ];
     public $employeeInfo = ['firstName' => ''];
     public $requestDate = ''; // For filtering by request date
     public $statusFilter = ''; // For filtering by status
@@ -58,40 +63,73 @@ class Leave extends Component
 
     public function showEditLeaveModal($leaveId)
     {
-        // Logic to show edit modal (mock implementation)
+        // Find the leave request by ID
+        $leave = collect($this->leaveRecords)->firstWhere('id', $leaveId);
+        
+        $this->leaveRequest = [
+            'id' => $leave->id,
+            'employee_id' => $leave->employee_id,
+            'request_date' => $leave->request_date,
+            'status' => $leave->status,
+        ];
+    }
+
+    public function updateLeaveRequest()
+    {
+        // Update the leave request in the leaveRecords array
+        $leaveIndex = array_search($this->leaveRequest['id'], array_column($this->leaveRecords, 'id'));
+        
+        if ($leaveIndex !== false) {
+            $this->leaveRecords[$leaveIndex] = (object) $this->leaveRequest;
+        }
+
+        session()->flash('message', 'Leave request updated successfully!');
+        $this->resetLeaveRequest();
     }
 
     public function confirmDestroyLeave($leaveId)
     {
-        // Logic to confirm deletion (mock implementation)
         $this->confirmedId = $leaveId;
     }
 
     public function destroyLeave()
     {
-        // Logic to delete a Leave request (mock implementation)
+        // Remove the confirmed leave request
         $this->leaveRecords = array_filter($this->leaveRecords, function($leave) {
             return $leave->id !== $this->confirmedId;
         });
 
+        session()->flash('message', 'Leave request deleted successfully!');
         $this->confirmedId = null;
     }
 
     public function render()
     {
-        $filteredRecords = $this->filterLeaveRecords();
-
+        // Eloquent pagination with filtering
+        $leaveRecords = LeaveRequest::query()
+            ->when($this->employeeInfo['firstName'], function($query) {
+                $query->whereHas('employee', function($query) {
+                    $query->where('first_name', 'like', '%' . $this->employeeInfo['firstName'] . '%');
+                });
+            })
+            ->when($this->requestDate, function($query) {
+                $query->where('request_date', $this->requestDate);
+            })
+            ->when($this->statusFilter, function($query) {
+                $query->where('status', $this->statusFilter);
+            })
+            ->paginate(5);  // Paginate with 5 records per page
+    
         return view('livewire.human-resource.leave', [
-            'leaveRecords' => $filteredRecords,
+            'leaveRecords' => $leaveRecords,
         ]);
     }
+    
 
     protected function filterLeaveRecords()
     {
-        // Start with the base records
+        // Filter based on employee name
         $filteredRecords = $this->leaveRecords;
-
-        // Filter by employee name
         if (!empty($this->employeeInfo['firstName'])) {
             $filteredRecords = array_filter($filteredRecords, function($leave) {
                 $employeeName = $this->getEmployeeName($leave->employee_id);
@@ -102,17 +140,27 @@ class Leave extends Component
         // Filter by request date
         if (!empty($this->requestDate)) {
             $filteredRecords = array_filter($filteredRecords, function($leave) {
-                return $leave->request_date === $this->requestDate; // Match exact date
+                return $leave->request_date === $this->requestDate;
             });
         }
 
         // Filter by status
         if (!empty($this->statusFilter)) {
             $filteredRecords = array_filter($filteredRecords, function($leave) {
-                return $leave->status === $this->statusFilter; // Match exact status
+                return $leave->status === $this->statusFilter;
             });
         }
 
         return $filteredRecords;
+    }
+
+    private function resetLeaveRequest()
+    {
+        $this->leaveRequest = [
+            'id' => null,
+            'employee_id' => null,
+            'request_date' => '',
+            'status' => '',
+        ];
     }
 }

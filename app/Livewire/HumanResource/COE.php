@@ -1,118 +1,100 @@
 <?php
-
 namespace App\Livewire\HumanResource;
 
 use Livewire\Component;
+use App\Models\Request; // Import Request model
+use Livewire\WithPagination;
 
 class COE extends Component
 {
-    public $coeRecords = [];
-    public $confirmedId = null;
+    use WithPagination;
+
+    public $confirmedId = null; // To track which request is being deleted
     public $employeeInfo = ['firstName' => ''];
     public $requestDate = ''; // For filtering by request date
     public $statusFilter = ''; // For filtering by status
+    public $searchTerm = ''; // For search by employee name
 
     public function mount()
     {
-        // Mock data for Certificate of Employment requests
-        $this->coeRecords = [
-            (object)[
-                'id' => 1,
-                'employee_id' => 101,
-                'request_date' => '2024-10-20',
-                'status' => 'Pending',
-            ],
-            (object)[
-                'id' => 2,
-                'employee_id' => 102,
-                'request_date' => '2024-10-25',
-                'status' => 'Completed',
-            ],
-            (object)[
-                'id' => 3,
-                'employee_id' => 103,
-                'request_date' => '2024-10-30',
-                'status' => 'Pending',
-            ],
-            (object)[
-                'id' => 4,
-                'employee_id' => 104,
-                'request_date' => '2024-11-05',
-                'status' => 'Rejected',
-            ],
-        ];
+        // Initialize if needed
     }
 
-    public function getEmployeeName($id)
+    // Function to get employee name by ID
+    public function getEmployeeName($employeeId)
     {
-        // Mock employee names
-        $employees = [
-            101 => 'Alice Smith',
-            102 => 'Bob Johnson',
-            103 => 'Charlie Brown',
-            104 => 'Daisy Williams',
-        ];
-
-        return $employees[$id] ?? 'Unknown Employee';
+        $employee = \App\Models\Employee::find($employeeId);
+        return $employee ? $employee->name : 'Unknown Employee';
     }
 
-    public function showEditCOEModal($coeId)
+    // Approve Request: Change status to Completed
+    public function approveRequest($requestId)
     {
-        // Logic to show edit modal (mock implementation)
+        $request = Request::find($requestId);
+        if ($request) {
+            $request->status = 'Completed';
+            $request->save();
+            session()->flash('message', 'Request approved!');
+        }
     }
 
-    public function confirmDestroyCOE($coeId)
+    // Reject Request: Change status to Rejected
+    public function rejectRequest($requestId)
     {
-        // Logic to confirm deletion (mock implementation)
-        $this->confirmedId = $coeId;
+        $request = Request::find($requestId);
+        if ($request) {
+            $request->status = 'Rejected';
+            $request->save();
+            session()->flash('message', 'Request rejected!');
+        }
     }
 
-    public function destroyCOE()
+    // Confirm Request Deletion
+    public function confirmDestroyRequest($requestId)
     {
-        // Logic to delete a Certificate of Employment request (mock implementation)
-        $this->coeRecords = array_filter($this->coeRecords, function($coe) {
-            return $coe->id !== $this->confirmedId;
-        });
-
-        $this->confirmedId = null;
+        $this->confirmedId = $requestId;
     }
 
+    // Delete Request
+    public function destroyRequest()
+    {
+        $request = Request::find($this->confirmedId);
+        if ($request) {
+            $request->delete();
+            session()->flash('message', 'Request deleted!');
+        }
+        $this->confirmedId = null; // Reset the confirmedId after deletion
+    }
+
+    // Render method to fetch requests with applied filters
     public function render()
     {
-        $filteredRecords = $this->filterCOERecords();
+        $requests = Request::query();
 
-        return view('livewire.human-resource.coe', [
-            'coeRecords' => $filteredRecords,
-        ]);
-    }
+        // Ensure only COE requests are fetched
+        $requests->where('type', 'Certificate of Employment');  // Filter by request type
 
-    protected function filterCOERecords()
-    {
-        // Start with the base records
-        $filteredRecords = $this->coeRecords;
-
-        // Filter by employee name
-        if (!empty($this->employeeInfo['firstName'])) {
-            $filteredRecords = array_filter($filteredRecords, function($coe) {
-                $employeeName = $this->getEmployeeName($coe->employee_id);
-                return stripos($employeeName, $this->employeeInfo['firstName']) !== false;
+        // Search by employee name
+        if (!empty($this->searchTerm)) {
+            $requests->whereHas('employee', function($query) {
+                $query->where('name', 'like', '%' . $this->searchTerm . '%');
             });
         }
 
         // Filter by request date
         if (!empty($this->requestDate)) {
-            $filteredRecords = array_filter($filteredRecords, function($coe) {
-                return $coe->request_date === $this->requestDate; // Match exact date
-            });
+            $requests->where('request_date', $this->requestDate);
         }
 
         // Filter by status
         if (!empty($this->statusFilter)) {
-            $filteredRecords = array_filter($filteredRecords, function($coe) {
-                return $coe->status === $this->statusFilter; // Match exact status
-            });
+            $requests->where('status', $this->statusFilter);
         }
 
-        return $filteredRecords;
+        $requests = $requests->paginate(10); // Paginate results
+
+        return view('livewire.human-resource.coe', [
+            'requests' => $requests,
+        ]);
     }
 }
