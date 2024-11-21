@@ -12,7 +12,7 @@ use App\Livewire\HumanResource\COE;
 use App\Livewire\HumanResource\ServiceRecords;
 use App\Livewire\HumanResource\Leave;
 use App\Livewire\HumanResource\Payslip;
-use App\Livewire\Employee\Employee;
+
  
 use App\Livewire\HumanResource\Statistics;
  
@@ -38,7 +38,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])->group(function () {
     // 👉 Dashboard
-    Route::group(['middleware' => ['role:Admin|AM|CC|CR|HR']], function () {
+    Route::group(['middleware' => ['role:Admin|Employee|AM|CC|CR|HR']], function () {
         Route::redirect('/', '/dashboard');
         Route::get('/dashboard', Dashboard::class)->name('dashboard');
     });
@@ -63,12 +63,6 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
 
   
     });
-
-    Route::group(['middleware' => ['role:Employee']], function () {
-        Route::get('/employee', Employee::class)->name('employee');
-  
-    });
-    
     
 
     Route::group(['middleware' => ['role:Employee|Admin|HR']], function () {

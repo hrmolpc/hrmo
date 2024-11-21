@@ -5,7 +5,7 @@
       "name": "Dashboard",
       "icon": "menu-icon tf-icons ti ti-dashboard",
       "slug": "dashboard",
-      "role": ["Admin"]
+      "role": ["Admin, Employee"]
     },
     {
       "menuHeader": "Request Type",
@@ -38,16 +38,7 @@
       "icon": "menu-icon tf-icons ti ti-devices",
       "slug": "serviceRecords",
       "role": ["Admin"]
-    },
-
-    {
-      "url": "/employee",
-      "name": "My Requests",
-      "icon": "menu-icon tf-icons ti ti-devices",
-      "slug": "serviceRecords",
-      "role": ["Employee"]
     }
-
  
   ]
 }
