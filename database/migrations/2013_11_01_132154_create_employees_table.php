@@ -36,7 +36,6 @@ class CreateEmployeesTable extends Migration
             $table->string('created_by')->nullable(); // New field
             $table->string('updated_by')->nullable(); // New field
             $table->string('deleted_by')->nullable(); // New field
-            $table->string('account_type')->nullable(); // New field
             $table->timestamps();
             $table->softDeletes(); // Enable soft deletes
         });

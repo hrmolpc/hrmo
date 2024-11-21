@@ -20,7 +20,7 @@ class Employee extends Model
 
     protected $fillable = [
         'employee_id', 
-        'first_name', 'last_name', 'gender', 'email', 'mobile_number','account_type',
+        'first_name', 'last_name', 'gender', 'email', 'mobile_number',
         'birthday', 'nationality', 'address', 'emergency_contact_name',
         'emergency_contact_number', 'relation_to_employee', 'emergency_contact_address',
         'employment_status', 'start_date', 'position', 'department',

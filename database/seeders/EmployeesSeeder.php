@@ -18,7 +18,6 @@ class EmployeesSeeder extends Seeder
                 'last_name' => $faker->lastName,
                 'gender' => $faker->randomElement(['male', 'female', 'other']),
                 'email' => $faker->unique()->safeEmail,
-                'account_type' => "employee",
                 'mobile_number' => $faker->unique()->numerify('##########'),
                 'birthday' => $faker->date(),
                 'nationality' => $faker->country,
