@@ -85,9 +85,6 @@ class Employees extends Component
     }
     
 
-    
-    
-
     public function showEditEmployeeModal(Employee $employee)
     {
         $this->isEdit = true;

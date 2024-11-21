@@ -48,15 +48,19 @@ class Employee extends Component
             'deleted_at' => null,
         ];
 
+        Request::create($data);
         try {
-            Request::create($data);
+            
             session()->flash('message', 'Request submitted successfully!');
         } catch (\Exception $e) {
             session()->flash('error', 'There was an error submitting your request.');
         }
 
         // Reset the form
+             // Emit event to close modal
+        
         $this->reset();
+            // Emit a browser event to trigger a modal close or any other JavaScript actio
     }
 
     public function setRequestToDelete($requestId)

@@ -1,13 +1,17 @@
 <div>
+    @php
+        $configData = Helper::appClasses();
+    @endphp
+
     @section('title', 'Service Records')
 
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
-                <a href="{{ route('dashboard') }}">{{ __('Dashboard') }}</a>
+                <a href="{{ route('dashboard') }}">Dashboard</a>
             </li>
-            <li class="breadcrumb-item active">{{ __('Human Resource') }}</li>
-            <li class="breadcrumb-item active">{{ __('Service Records') }}</li>
+            <li class="breadcrumb-item active">Human Resource</li>
+            <li class="breadcrumb-item active">Service Records Requests</li>
         </ol>
     </nav>
 
@@ -15,67 +19,289 @@
     @include('_partials/_alerts/alert-general')
 
     <div class="row">
-        <div class="col-12 mb-4">
+        <div class="col-13 mb-4">
             <div class="row mt-3">
                 <div class="col">
                     <div class="card">
-                        <h5 class="card-header">{{ __('Service Records')}}</h5>
+                        <h5 class="card-header">{{ __('Service Records Request')}}</h5>
                         <div class="table-responsive text-nowrap">
-                            <div class="row mx-4 mb-3">
-                                <div class="col-md-4">
-                                    <label class="form-label w-100">Search by Employee Name</label>
-                                    <input wire:model='employeeInfo.firstName' class="form-control @error('employeeInfo.firstName') is-invalid @enderror" type="text" />
-                                </div>
-
-                                <div class="col-md-4">
-                                    <label class="form-label w-100">Filter by Request Date</label>
-                                    <input wire:model='requestDate' class="form-control @error('requestDate') is-invalid @enderror" type="date" />
-                                </div>
-
-                                <div class="col-md-4">
-                                    <label class="form-label w-100">Filter by Status</label>
-                                    <select wire:model='statusFilter' class="form-select @error('statusFilter') is-invalid @enderror">
-                                        <option value="">Select Status</option>
-                                        <option value="Active">Active</option>
-                                        <option value="Inactive">Inactive</option>
-                                    </select>
-                                </div>
-                            </div>
-
                             <table class="table table-hover">
                                 <thead>
                                     <tr>
                                         <th class="col-1">{{ __('ID') }}</th>
                                         <th>{{ __('Employee') }}</th>
-                                        <th class="col-1">{{ __('Request Date') }}</th>
+                                        <th style="text-align: center">{{ __('Request Date') }}</th>
                                         <th style="text-align: center">{{ __('Status') }}</th>
                                         <th style="text-align: center">{{ __('Actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody class="table-border-bottom-0">
-                                    @forelse($serviceRecords as $record)
+                                    @forelse($requests as $request)
                                         <tr>
-                                            <td><strong>{{ $record->id }}</strong></td>
-                                            <td class="td">{{ $this->getEmployeeName($record->employee_id) }}</td>
-                                            <td style="text-align: center">{{ $record->request_date }}</td>
-                                            <td style="text-align: center">{{ $record->status }}</td>
+                                            <td><strong>{{ $request->id }}</strong></td>
+                                            <td class="td">{{ $this->getEmployeeName($request->employee_id) }}</td>
+                                            <td style="text-align: center">{{ \Carbon\Carbon::parse($request->created_at)->format('F j, Y') }}</td>
+
+                                            <td style="text-align: center">{{ $request->status }}</td>
                                             <td style="text-align: center">
-                                                <button type="button" class="btn btn-sm btn-tr rounded-pill btn-icon btn-outline-secondary waves-effect" wire:click.prevent="showViewModal({{ $record->id }})" data-bs-toggle="modal" data-bs-target="#viewModal">
+                                                <!-- View Button -->
+                                                <button type="button" class="btn btn-sm btn-tr rounded-pill btn-icon btn-outline-secondary waves-effect" data-bs-toggle="modal" data-bs-target="#viewModal-{{ $request->id }}">
                                                     <span class="ti ti-eye"></span>
                                                 </button>
-                                                <button type="button" class="btn btn-sm btn-success rounded-pill btn-icon waves-effect" wire:click.prevent="showApproveModal({{ $record->id }})" data-bs-toggle="modal" data-bs-target="#approveModal">
-                                                    <span class="ti ti-check"></span>
-                                                </button>
-                                                <button type="button" class="btn btn-sm btn-tr rounded-pill btn-icon btn-outline-danger waves-effect" wire:click.prevent="showRejectModal({{ $record->id }})" data-bs-toggle="modal" data-bs-target="#rejectModal">
+
+                                                <!-- Approve/Reject Buttons -->
+                                                @if ($request->status == 'Pending')
+                                                    <button type="button" class="btn btn-sm btn-success rounded-pill btn-icon waves-effect" data-bs-toggle="modal" data-bs-target="#approveRejectModal-{{ $request->id }}">
+                                                        <span class="ti ti-check"></span>
+                                                    </button>
+                                     
+                                                @endif
+
+                                                <!-- Delete Button -->
+                                                <button type="button" class="btn btn-sm btn-tr rounded-pill btn-icon btn-outline-danger waves-effect" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ $request->id }}">
                                                     <span class="ti ti-trash"></span>
                                                 </button>
-                                                @if ($confirmedId === $record->id)
-                                                    <button wire:click.prevent="destroyServiceRecord" type="button" class="btn btn-xs btn-danger waves-effect waves-light">
-                                                        {{ __('Sure?') }}
-                                                    </button>
-                                                @endif
                                             </td>
                                         </tr>
+
+                                        <!-- View Modal -->
+                                        <div class="modal fade" id="viewModal-{{ $request->id }}" tabindex="-1" aria-labelledby="viewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-primary text-white py-3">
+                <div class="d-flex align-items-center">
+                    <span class="badge bg-light text-primary me-3">{{ $request->type }}</span>
+                    <h5 class="modal-title">Request Details</h5>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="card border-0 h-100">
+                            <div class="card-body">
+                                <h6 class="card-title text-muted mb-3">
+                                   Request Information
+                                </h6>
+                                <ul class="list-unstyled">
+                                    <li class="mb-2">
+                                        <span class="fw-bold text-muted me-2"><i class="bi bi-calendar-check me-1"></i>Request Date:</span>
+                                        {{ \Carbon\Carbon::parse($request->created_at)->format('F j, Y') }}
+                                    </li>
+                                    <li class="mb-2">
+                                        <span class="fw-bold text-muted me-2"><i class="bi bi-person me-1"></i>Employee Name:</span>
+                                        {{ $this->getEmployeeName($request->employee_id) }}
+                                    </li>
+                                    <li class="mb-2">
+                                        <span class="fw-bold text-muted me-2"><i class="bi bi-check-circle me-1"></i>Status:</span>
+                                        <span class="badge 
+                                            @switch($request->status)
+                                                @case('Approved') bg-success @break
+                                                @case('Pending') bg-warning @break
+                                                @case('Rejected') bg-danger @break
+                                                @default bg-secondary
+                                            @endswitch
+                                        ">
+                                            {{ $request->status }}
+                                        </span>
+                                    </li>
+                                    <li class="mb-2">
+                                        <span class="fw-bold text-muted me-2"><i class="bi bi-tag me-1"></i>Type:</span>
+                                        {{ $request->type }}
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card border-0 h-100">
+                            <div class="card-body">
+                                <h6 class="card-title text-muted mb-3">
+                                    <i class="bi bi-journal-text me-2"></i>Description
+                                </h6>
+                                <div class="alert alert-light border-0" role="alert">
+                                    <p class="mb-0">{{ $request->description }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Attachments Section -->
+                    <div class="col-12">
+                        <div class="card border-0">
+                            <div class="card-body">
+                                <h6 class="card-title text-muted mb-3">
+                                    <i class="bi bi-paperclip me-2"></i>Attachments
+                                </h6>
+                                @if($request->attachments && count($request->attachments) > 0)
+                                    <div class="list-group">
+                                        @foreach($request->attachments as $attachment)
+                                            <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                                <div class="d-flex align-items-center">
+                                                    <i class="bi 
+                                                        @switch(pathinfo($attachment->file_name, PATHINFO_EXTENSION))
+                                                            @case('pdf') bi-file-pdf text-danger @break
+                                                            @case('doc')
+                                                            @case('docx') bi-file-word text-primary @break
+                                                            @case('xls')
+                                                            @case('xlsx') bi-file-excel text-success @break
+                                                            @case('jpg')
+                                                            @case('jpeg')
+                                                            @case('png')
+                                                            @case('gif') bi-file-image text-info @break
+                                                            @default bi-file text-secondary
+                                                        @endswitch
+                                                    me-3 fs-4"></i>
+                                                    <span>{{ $attachment->file_name }}</span>
+                                                </div>
+                                                <div class="btn-group" role="group">
+                                                    <a href="{{ route('download.attachment', $attachment->id) }}" 
+                                                       class="btn btn-sm btn-outline-primary" 
+                                                       title="Download">
+                                                        <i class="bi bi-download"></i>
+                                                    </a>
+                                                    <button 
+                                                        onclick="window.open('{{ route('view.attachment', $attachment->id) }}', '_blank')" 
+                                                        class="btn btn-sm btn-outline-secondary" 
+                                                        title="View">
+                                                        <i class="bi bi-eye"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <div class="alert alert-light text-muted text-center" role="alert">
+                                        <i class="bi bi-exclamation-circle me-2"></i>
+                                        No attachments found
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-2"></i>Close
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+                                        <!-- Approve/Reject Modal -->
+                                        <div class="modal fade" id="approveRejectModal-{{ $request->id }}" tabindex="-1" aria-labelledby="approveRejectModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-primary text-white py-3">
+                <div class="d-flex align-items-center">
+                <div class="d-flex align-items-center">
+                    <span class="badge bg-light text-danger me-3">Confirm Action</span>
+                    <h5 class="modal-title" id="deleteModalLabel">Approve / Reject Request</h5>
+                </div>
+               
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-4">
+                    <div class="col-12">
+                        <div class="card border-0">
+                            <div class="card-body">
+                                <div class="alert alert-warning border-0" role="alert">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-exclamation-triangle me-3 fs-4"></i>
+                                        <p class="mb-0">
+                                            Are you sure you want to 
+                                            @if($request->status == 'Pending')
+                                                approve
+                                            @else
+                                                reject
+                                            @endif 
+                                            this request?
+                                        </p>
+                                    </div>
+                                </div>
+                                <ul class="list-unstyled mt-3">
+                                    <li class="mb-2">
+                                        <span class="fw-bold text-muted me-2"><i class="bi bi-person me-1"></i>Employee Name:</span>
+                                        {{ $this->getEmployeeName($request->employee_id) }}
+                                    </li>
+                                    <li class="mb-2">
+                                        <span class="fw-bold text-muted me-2"><i class="bi bi-calendar-check me-1"></i>Request Date:</span>
+                                        {{ \Carbon\Carbon::parse($request->created_at)->format('F j, Y') }}
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-2"></i>Cancel
+                </button>
+                <button type="button" class="btn btn-success" wire:click.prevent="approveRequest({{ $request->id }})" data-bs-dismiss="modal">
+                    <i class="bi bi-check-circle me-2"></i>Approve
+                </button>
+                <button type="button" class="btn btn-danger" wire:click.prevent="rejectRequest({{ $request->id }})" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-2"></i>Reject
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+                                        <!-- Delete Modal -->
+                                        <div class="modal fade" id="deleteModal-{{ $request->id }}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-danger text-white py-3">
+                <div class="d-flex align-items-center">
+                    <span class="badge bg-light text-danger me-3">Confirm Deletion</span>
+                    <h5 class="modal-title" id="deleteModalLabel">Delete Request</h5>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-4">
+                    <div class="col-12">
+                        <div class="card border-0">
+                            <div class="card-body">
+                                <div class="alert alert-danger border-0" role="alert">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-trash me-3 fs-4"></i>
+                                        <p class="mb-0">Are you sure you want to permanently delete this request?</p>
+                                    </div>
+                                </div>
+                                <ul class="list-unstyled mt-3">
+                                    <li class="mb-2">
+                                        <span class="fw-bold text-muted me-2"><i class="bi bi-person me-1"></i>Employee Name:</span>
+                                        {{ $this->getEmployeeName($request->employee_id) }}
+                                    </li>
+                                    <li class="mb-2">
+                                        <span class="fw-bold text-muted me-2"><i class="bi bi-calendar-check me-1"></i>Request Date:</span>
+                                        {{ \Carbon\Carbon::parse($request->created_at)->format('F j, Y') }}
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-2"></i>Cancel
+                </button>
+                <button type="button" class="btn btn-danger" wire:click.prevent="destroyRequest({{ $request->id }})" data-bs-dismiss="modal">
+                    <i class="bi bi-trash me-2"></i>Delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
                                     @empty
                                         <tr>
                                             <td colspan="5">
@@ -89,6 +315,9 @@
                                     @endforelse
                                 </tbody>
                             </table>
+
+                            <!-- Pagination -->
+                            {{ $requests->links() }}
                         </div>
                     </div>
                 </div>
@@ -96,85 +325,13 @@
         </div>
     </div>
 
-    {{-- View Modal --}}
-    <div class="modal fade" id="viewModal" tabindex="-1" aria-labelledby="viewModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="viewModalLabel">{{ __('Service Record Details') }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    @if ($viewRecordId)
-                        @php
-                            $record = collect($serviceRecords)->firstWhere('id', $viewRecordId);
-                        @endphp
-                        <h5>{{ __('Employee: ') . $this->getEmployeeName($record->employee_id) }}</h5>
-                        <p><strong>{{ __('Request Date: ') }}</strong>{{ $record->request_date }}</p>
-                        <p><strong>{{ __('Reason for Request: ') }}</strong>{{ $record->reason_for_request }}</p>
-                        <p><strong>{{ __('Attachments: ') }}</strong><a href="{{ asset($record->attachments) }}" target="_blank">View Document</a></p>
-                    @endif
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('Close') }}</button>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    {{-- Approve Modal --}}
-    <div class="modal fade" id="approveModal" tabindex="-1" aria-labelledby="approveModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="approveModalLabel">{{ __('Approve Service Record') }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    @if ($approveRecordId)
-                        @php
-                            $record = collect($serviceRecords)->firstWhere('id', $approveRecordId);
-                        @endphp
-                        <h5>{{ __('Are you sure you want to approve this request?') }}</h5>
-                        <p><strong>{{ __('Employee: ') . $this->getEmployeeName($record->employee_id) }}</strong></p>
-                        <p><strong>{{ __('Request Date: ') }}</strong>{{ $record->request_date }}</p>
-                        <p><strong>{{ __('Attachments: ') }}</strong><a href="{{ asset($record->attachments) }}" target="_blank">View Document</a></p>
-                        <label for="approvalDocument" class="form-label">{{ __('Attach approval document') }}</label>
-                        <input type="file" wire:model="approvalDocument" class="form-control">
-                    @endif
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('Close') }}</button>
-                    <button type="button" class="btn btn-primary" wire:click.prevent="approveServiceRecord" data-bs-dismiss="modal">{{ __('Approve') }}</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    {{-- Reject Modal --}}
-    <div class="modal fade" id="rejectModal" tabindex="-1" aria-labelledby="rejectModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="rejectModalLabel">{{ __('Reject Service Record') }}</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    @if ($rejectRecordId)
-                        @php
-                            $record = collect($serviceRecords)->firstWhere('id', $rejectRecordId);
-                        @endphp
-                        <h5>{{ __('Are you sure you want to reject this request?') }}</h5>
-                        <p><strong>{{ __('Employee: ') . $this->getEmployeeName($record->employee_id) }}</strong></p>
-                        <p><strong>{{ __('Request Date: ') }}</strong>{{ $record->request_date }}</p>
-                        <p><strong>{{ __('Attachments: ') }}</strong><a href="{{ asset($record->attachments) }}" target="_blank">View Document</a></p>
-                    @endif
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('Close') }}</button>
-                    <button type="button" class="btn btn-danger" wire:click.prevent="rejectServiceRecord" data-bs-dismiss="modal">{{ __('Reject') }}</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <style>
+.modal-content {
+    border-radius: 12px;
+}
+.modal-header {
+    background: linear-gradient(135deg, #3b8132 0%, #FFFFFF 100%);
+}
+</style>
 </div>

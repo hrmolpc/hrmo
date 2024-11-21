@@ -78,6 +78,22 @@ class Dashboard extends Component
             //->whereBetween('created_at', [$startOfDay, $endOfDay])
             ->get();
     }
+
+    public function getEmployeeName($employeeId)
+    {
+ 
+        $employee = \App\Models\Employee::find($employeeId);
+    
+        // Log whether the employee was found or not
+        if ($employee) {
+            // Combine first name and last name to create full name
+            $fullName = $employee->first_name . ' ' . $employee->last_name;
+           
+            return $fullName;
+        } else {
+            return 'Unknown Employee';
+        }
+    }
     
     
 

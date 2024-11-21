@@ -1,118 +1,94 @@
 <?php
-
 namespace App\Livewire\HumanResource;
 
 use Livewire\Component;
+use App\Models\Request; // Import Request model
+use Livewire\WithPagination;
+use Illuminate\Support\Facades\Log; 
 
 class Payslip extends Component
 {
-    public $payslipRecords = [];
-    public $confirmedId = null;
+    use WithPagination;
+
+    public $confirmedId = null; // To track which request is being deleted
     public $employeeInfo = ['firstName' => ''];
     public $requestDate = ''; // For filtering by request date
     public $statusFilter = ''; // For filtering by status
+    public $searchTerm = ''; // For search by employee name
 
     public function mount()
     {
-        // Mock data for Payslip requests
-        $this->payslipRecords = [
-            (object)[
-                'id' => 1,
-                'employee_id' => 101,
-                'request_date' => '2024-10-01',
-                'status' => 'Processed',
-            ],
-            (object)[
-                'id' => 2,
-                'employee_id' => 102,
-                'request_date' => '2024-10-15',
-                'status' => 'Pending',
-            ],
-            (object)[
-                'id' => 3,
-                'employee_id' => 103,
-                'request_date' => '2024-10-20',
-                'status' => 'Processed',
-            ],
-            (object)[
-                'id' => 4,
-                'employee_id' => 104,
-                'request_date' => '2024-10-30',
-                'status' => 'Rejected',
-            ],
-        ];
     }
 
-    public function getEmployeeName($id)
+    public function getEmployeeName($employeeId)
     {
-        // Mock employee names
-        $employees = [
-            101 => 'Alice Smith',
-            102 => 'Bob Johnson',
-            103 => 'Charlie Brown',
-            104 => 'Daisy Williams',
-        ];
-
-        return $employees[$id] ?? 'Unknown Employee';
+ 
+        $employee = \App\Models\Employee::find($employeeId);
+    
+        // Log whether the employee was found or not
+        if ($employee) {
+            // Combine first name and last name to create full name
+            $fullName = $employee->first_name . ' ' . $employee->last_name;
+           
+            return $fullName;
+        } else {
+            return 'Unknown Employee';
+        }
     }
 
-    public function showEditPayslipModal($payslipId)
+    // Approve Request: Change status to Completed
+    public function approveRequest($requestId)
     {
-        // Logic to show edit modal (mock implementation)
+        $request = Request::find($requestId);
+        if ($request) {
+            $request->status = 'Approved';
+            $request->save();
+            session()->flash('message', 'Request approved!');
+        }
     }
 
-    public function confirmDestroyPayslip($payslipId)
+    // Reject Request: Change status to Rejected
+    public function rejectRequest($requestId)
     {
-        // Logic to confirm deletion (mock implementation)
-        $this->confirmedId = $payslipId;
+        $request = Request::find($requestId);
+        if ($request) {
+            $request->status = 'Rejected';
+            $request->save();
+            session()->flash('message', 'Request rejected!');
+        }
     }
 
-    public function destroyPayslip()
+    // Confirm Request Deletion
+    public function confirmDestroyRequest($requestId)
     {
-        // Logic to delete a Payslip request (mock implementation)
-        $this->payslipRecords = array_filter($this->payslipRecords, function($payslip) {
-            return $payslip->id !== $this->confirmedId;
-        });
-
-        $this->confirmedId = null;
+        $this->confirmedId = $requestId;
     }
 
+    // Delete Request
+    public function destroyRequest()
+    {
+        $request = Request::find($this->confirmedId);
+        if ($request) {
+            $request->delete();
+            session()->flash('message', 'Request deleted!');
+        }
+        $this->confirmedId = null; // Reset the confirmedId after deletion
+    }
+
+    // Render method to fetch requests with applied filters
     public function render()
     {
-        $filteredRecords = $this->filterPayslipRecords();
+        $requests = Request::query();
+
+        $requests = Request::query()
+        ->where('type', 'Payslip'); // Filter by type
+
+    
+
+        $requests = $requests->paginate(10); // Paginate results
 
         return view('livewire.human-resource.payslip', [
-            'payslipRecords' => $filteredRecords,
+            'requests' => $requests,
         ]);
-    }
-
-    protected function filterPayslipRecords()
-    {
-        // Start with the base records
-        $filteredRecords = $this->payslipRecords;
-
-        // Filter by employee name
-        if (!empty($this->employeeInfo['firstName'])) {
-            $filteredRecords = array_filter($filteredRecords, function($payslip) {
-                $employeeName = $this->getEmployeeName($payslip->employee_id);
-                return stripos($employeeName, $this->employeeInfo['firstName']) !== false;
-            });
-        }
-
-        // Filter by request date
-        if (!empty($this->requestDate)) {
-            $filteredRecords = array_filter($filteredRecords, function($payslip) {
-                return $payslip->request_date === $this->requestDate; // Match exact date
-            });
-        }
-
-        // Filter by status
-        if (!empty($this->statusFilter)) {
-            $filteredRecords = array_filter($filteredRecords, function($payslip) {
-                return $payslip->status === $this->statusFilter; // Match exact status
-            });
-        }
-
-        return $filteredRecords;
     }
 }

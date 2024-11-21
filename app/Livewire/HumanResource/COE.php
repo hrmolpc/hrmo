@@ -4,6 +4,7 @@ namespace App\Livewire\HumanResource;
 use Livewire\Component;
 use App\Models\Request; // Import Request model
 use Livewire\WithPagination;
+use Illuminate\Support\Facades\Log; 
 
 class COE extends Component
 {
@@ -17,14 +18,22 @@ class COE extends Component
 
     public function mount()
     {
-        // Initialize if needed
     }
 
-    // Function to get employee name by ID
     public function getEmployeeName($employeeId)
     {
+ 
         $employee = \App\Models\Employee::find($employeeId);
-        return $employee ? $employee->name : 'Unknown Employee';
+    
+        // Log whether the employee was found or not
+        if ($employee) {
+            // Combine first name and last name to create full name
+            $fullName = $employee->first_name . ' ' . $employee->last_name;
+           
+            return $fullName;
+        } else {
+            return 'Unknown Employee';
+        }
     }
 
     // Approve Request: Change status to Completed
@@ -32,7 +41,7 @@ class COE extends Component
     {
         $request = Request::find($requestId);
         if ($request) {
-            $request->status = 'Completed';
+            $request->status = 'Approved';
             $request->save();
             session()->flash('message', 'Request approved!');
         }
@@ -71,25 +80,10 @@ class COE extends Component
     {
         $requests = Request::query();
 
-        // Ensure only COE requests are fetched
-        $requests->where('type', 'Certificate of Employment');  // Filter by request type
+        $requests = Request::query()
+        ->where('type', 'Certificate of Employment'); // Filter by type
 
-        // Search by employee name
-        if (!empty($this->searchTerm)) {
-            $requests->whereHas('employee', function($query) {
-                $query->where('name', 'like', '%' . $this->searchTerm . '%');
-            });
-        }
-
-        // Filter by request date
-        if (!empty($this->requestDate)) {
-            $requests->where('request_date', $this->requestDate);
-        }
-
-        // Filter by status
-        if (!empty($this->statusFilter)) {
-            $requests->where('status', $this->statusFilter);
-        }
+    
 
         $requests = $requests->paginate(10); // Paginate results
 

@@ -1,173 +1,94 @@
 <?php
-
 namespace App\Livewire\HumanResource;
 
 use Livewire\Component;
+use App\Models\Request; // Import Request model
+use Livewire\WithPagination;
+use Illuminate\Support\Facades\Log; 
 
 class ServiceRecords extends Component
 {
-    public $serviceRecords = [];
-    public $confirmedId = null;
+    use WithPagination;
+
+    public $confirmedId = null; // To track which request is being deleted
     public $employeeInfo = ['firstName' => ''];
     public $requestDate = ''; // For filtering by request date
     public $statusFilter = ''; // For filtering by status
-
-    // For modals
-    public $viewRecordId = null;
-    public $approveRecordId = null;
-    public $rejectRecordId = null;
-    public $reasonForRequest = '';
-    public $attachment = '';
-    public $approvalDocument = '';
+    public $searchTerm = ''; // For search by employee name
 
     public function mount()
     {
-        // Mock data for Service Records
-        $this->serviceRecords = [
-            (object)[
-                'id' => 1,
-                'employee_id' => 101,
-                'request_date' => '2024-10-01',
-                'status' => 'Active',
-                'reason_for_request' => 'Need a day off for personal reasons.',
-                'attachments' => 'path/to/attachment1.pdf',
-            ],
-            (object)[
-                'id' => 2,
-                'employee_id' => 102,
-                'request_date' => '2024-10-15',
-                'status' => 'Inactive',
-                'reason_for_request' => 'Medical leave.',
-                'attachments' => 'path/to/attachment2.pdf',
-            ],
-            (object)[
-                'id' => 3,
-                'employee_id' => 103,
-                'request_date' => '2024-10-20',
-                'status' => 'Active',
-                'reason_for_request' => 'Family commitment.',
-                'attachments' => 'path/to/attachment3.pdf',
-            ],
-            (object)[
-                'id' => 4,
-                'employee_id' => 104,
-                'request_date' => '2024-10-30',
-                'status' => 'Inactive',
-                'reason_for_request' => 'Vacation.',
-                'attachments' => 'path/to/attachment4.pdf',
-            ],
-        ];
     }
 
-    public function getEmployeeName($id)
+    public function getEmployeeName($employeeId)
     {
-        // Mock employee names
-        $employees = [
-            101 => 'Alice Smith',
-            102 => 'Bob Johnson',
-            103 => 'Charlie Brown',
-            104 => 'Daisy Williams',
-        ];
-
-        return $employees[$id] ?? 'Unknown Employee';
+ 
+        $employee = \App\Models\Employee::find($employeeId);
+    
+        // Log whether the employee was found or not
+        if ($employee) {
+            // Combine first name and last name to create full name
+            $fullName = $employee->first_name . ' ' . $employee->last_name;
+           
+            return $fullName;
+        } else {
+            return 'Unknown Employee';
+        }
     }
 
-    public function showViewModal($recordId)
+    // Approve Request: Change status to Completed
+    public function approveRequest($requestId)
     {
-        $this->viewRecordId = $recordId;
+        $request = Request::find($requestId);
+        if ($request) {
+            $request->status = 'Approved';
+            $request->save();
+            session()->flash('message', 'Request approved!');
+        }
     }
 
-    public function showApproveModal($recordId)
+    // Reject Request: Change status to Rejected
+    public function rejectRequest($requestId)
     {
-        $this->approveRecordId = $recordId;
+        $request = Request::find($requestId);
+        if ($request) {
+            $request->status = 'Rejected';
+            $request->save();
+            session()->flash('message', 'Request rejected!');
+        }
     }
 
-    public function showRejectModal($recordId)
+    // Confirm Request Deletion
+    public function confirmDestroyRequest($requestId)
     {
-        $this->rejectRecordId = $recordId;
+        $this->confirmedId = $requestId;
     }
 
-    public function confirmDestroyServiceRecord($recordId)
+    // Delete Request
+    public function destroyRequest()
     {
-        // Logic to confirm deletion (mock implementation)
-        $this->confirmedId = $recordId;
+        $request = Request::find($this->confirmedId);
+        if ($request) {
+            $request->delete();
+            session()->flash('message', 'Request deleted!');
+        }
+        $this->confirmedId = null; // Reset the confirmedId after deletion
     }
 
-    public function destroyServiceRecord()
-    {
-        // Logic to delete a Service Record (mock implementation)
-        $this->serviceRecords = array_filter($this->serviceRecords, function($record) {
-            return $record->id !== $this->confirmedId;
-        });
-
-        $this->confirmedId = null;
-    }
-
-    public function approveServiceRecord()
-    {
-        // Logic to approve the service record (mock implementation)
-        // Implement the logic to handle the approval
-        $this->serviceRecords = array_map(function ($record) {
-            if ($record->id === $this->approveRecordId) {
-                $record->status = 'Approved';
-                // Save the approval document here if required
-            }
-            return $record;
-        }, $this->serviceRecords);
-        
-        $this->approveRecordId = null;
-    }
-
-    public function rejectServiceRecord()
-    {
-        // Logic to reject the service record (mock implementation)
-        // Implement the logic to handle the rejection
-        $this->serviceRecords = array_map(function ($record) {
-            if ($record->id === $this->rejectRecordId) {
-                $record->status = 'Rejected';
-            }
-            return $record;
-        }, $this->serviceRecords);
-
-        $this->rejectRecordId = null;
-    }
-
+    // Render method to fetch requests with applied filters
     public function render()
     {
-        $filteredRecords = $this->filterServiceRecords();
+        $requests = Request::query();
+
+        $requests = Request::query()
+        ->where('type', 'Service Records'); // Filter by type
+
+    
+
+        $requests = $requests->paginate(10); // Paginate results
 
         return view('livewire.human-resource.serviceRecords', [
-            'serviceRecords' => $filteredRecords,
+            'requests' => $requests,
         ]);
-    }
-
-    protected function filterServiceRecords()
-    {
-        // Start with the base records
-        $filteredRecords = $this->serviceRecords;
-
-        // Filter by employee name
-        if (!empty($this->employeeInfo['firstName'])) {
-            $filteredRecords = array_filter($filteredRecords, function($record) {
-                $employeeName = $this->getEmployeeName($record->employee_id);
-                return stripos($employeeName, $this->employeeInfo['firstName']) !== false;
-            });
-        }
-
-        // Filter by request date
-        if (!empty($this->requestDate)) {
-            $filteredRecords = array_filter($filteredRecords, function($record) {
-                return $record->request_date === $this->requestDate; // Match exact date
-            });
-        }
-
-        // Filter by status
-        if (!empty($this->statusFilter)) {
-            $filteredRecords = array_filter($filteredRecords, function($record) {
-                return $record->status === $this->statusFilter; // Match exact status
-            });
-        }
-
-        return $filteredRecords;
     }
 }
