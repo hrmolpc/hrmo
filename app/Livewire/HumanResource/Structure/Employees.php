@@ -3,7 +3,6 @@
 namespace App\Livewire\HumanResource\Structure;
 
 use App\Models\Employee;
-use App\Models\User;
 use Livewire\Component;
 use Livewire\WithPagination;
 
@@ -43,7 +42,6 @@ class Employees extends Component
             'employeeInfo.emergency_contact_number' => 'required|string|max:15',
             'employeeInfo.relation_to_employee' => 'required|string|max:50',
             'employeeInfo.emergency_contact_address' => 'required|string|max:255',
-            'employeeInfo.account_type' => 'required|string|max:255',
         ]);
 
         $this->isEdit ? $this->editEmployee() : $this->addEmployee();
@@ -73,11 +71,10 @@ class Employees extends Component
             if (!$this->isEdit) {
                 $this->employeeInfo['employee_id'] = $this->generateUniqueEmployeeId();
             }
-            
     
             // Create the employee record
             Employee::create($this->employeeInfo);
-            
+    
             $this->dispatch('closeModal', elementId: '#employeeModal');
             $this->dispatch('toastr', type: 'success', message: __('Employee added successfully!'));
         } catch (\Exception $e) {
@@ -95,7 +92,7 @@ class Employees extends Component
             'id', 'contract_id', 'first_name', 'last_name', 'gender',
             'email', 'mobile_number', 'birthday', 'nationality',
             'address', 'emergency_contact_name', 'emergency_contact_number',
-            'relation_to_employee', 'emergency_contact_address', 'account_type'
+            'relation_to_employee', 'emergency_contact_address'
         ]);
     }
 

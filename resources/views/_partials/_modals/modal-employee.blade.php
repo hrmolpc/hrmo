@@ -35,7 +35,7 @@
             <div class="modal-body">         
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>         
                 <div class="text-center mb-4">           
-                    <h3 class="mb-2">{{ $isEdit ? __('Edit Account') : __('New Account') }}</h3>           
+                    <h3 class="mb-2">{{ $isEdit ? __('Edit Employee') : __('New Employee') }}</h3>           
                     <p class="text-muted">{{ __('Please fill out the following information') }}</p>         
                 </div>         
                 <form wire:submit.prevent="submitEmployee" class="row g-3">           
@@ -93,10 +93,7 @@
                         <div class="row">
                         <div class="col-md-4">             
     <label class="form-label">{{ __('Employee ID') }}</label>             
-    
-    <input class="form-control" type="text" value="{{ $isEdit ? $employeeInfo['employee_id'] : $this->generateUniqueEmployeeId() }}" readonly/>      
-    
-    
+    <input class="form-control" type="text" value="{{ $isEdit ? $employeeInfo['employee_id'] : $this->generateUniqueEmployeeId() }}" readonly/>         
 </div>
 
                             <div class="col-md-4">             
@@ -127,17 +124,7 @@
                                 <label class="form-label">{{ __('Department') }}</label>             
                                 <input type="text" class="form-control" wire:model="employeeInfo.department" placeholder="Enter department" required/>           
                             </div>
-                            <div class="col-md-4">             
-                                <label class="form-label">{{ __('Account Type') }}</label>             
-                                <select class="form-select" wire:model="employeeInfo.employment_status" required>               
-                                    <option value="" disabled selected>{{ __('Select Status') }}</option>               
-                                    <option value="employee">{{ __('Employee') }}</option>               
-                                    <option value="admin">{{ __('Admin') }}</option>               
-                                             
-                                </select>           
-                            </div>
                         </div>
-                        
                     </div>
 
                     <div class="col-12 mb-4 form-section">
@@ -145,7 +132,7 @@
                         <div class="row">
                             <div class="col-md-4">             
                                 <label class="form-label">{{ __('Emergency Contact Name') }}</label>             
-                                <input type="text" class="form-control" wire:model="employeeInfo.emergency_contact_name" placeholder="Emergency Contact Number" required/>           
+                                <input type="text" class="form-control" wire:model="employeeInfo.emergency_contact_name" required/>           
                             </div>           
                             <div class="col-md-4">             
                                 <label class="form-label">{{ __('Emergency Contact Number') }}</label>             

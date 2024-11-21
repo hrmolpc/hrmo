@@ -25,7 +25,7 @@
 
 <div class="demo-inline-spacing">
   <button wire:click='showCreateEmployeeModal' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#employeeModal">
-    <span class="ti-xs ti ti-plus me-1"></span>{{ __('Add New Account') }}
+    <span class="ti-xs ti ti-plus me-1"></span>{{ __('Add New Employee') }}
   </button>
 </div>
 <br>
@@ -89,7 +89,7 @@
                   {{ __('No data found, please sprinkle some data in my virtual bowl, and let the fun begin!') }}
                 </p>
                 <button class="btn btn-label-primary mb-4" data-bs-toggle="modal" data-bs-target="#employeeModal">
-                    {{ __('Add New Account') }}
+                    {{ __('Add New Employee') }}
                   </button>
                 <div>
                   <img src="{{ asset('assets/img/illustrations/page-misc-under-maintenance.png') }}" width="200" class="img-fluid">
