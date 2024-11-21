@@ -130,7 +130,7 @@
             <div class="btn-group dropend">
                 <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown"
                     aria-haspopup="true" aria-expanded="false">
-                    <i class="ti ti-menu-2 ti-xs me-1"></i>Add New Employee
+                    <i class="ti ti-menu-2 ti-xs me-1"></i>Add New Account
                 </button>
                 <ul class="dropdown-menu">
                     @can('create employees')
@@ -447,7 +447,7 @@
 
 
     @elseif ($userRole == 'employee')
-    <div class="row">
+       <div class="row">
         <div class="col-12 mb-4">
             <div class="row mt-3">
                 <div class="col">
