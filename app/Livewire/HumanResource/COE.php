@@ -72,10 +72,7 @@ class COE extends Component
     {
         $request = Request::find($requestId);
         if ($request) {
-            $this->validate([
-                'attachment' => 'nullable|file|mimes:pdf,jpg,png|max:10240', // Max size 10MB
-            ]);
-
+       
             if ($this->attachment) {
                 // Store the file (e.g., in the 'attachments' folder)
                 $path = $this->attachment->store('attachments', 'public');
@@ -84,7 +81,7 @@ class COE extends Component
 
             $request->status = 'Approved';
             $request->notes = $this->notes;
-            $request->approver_attachment = $this->uploadAttachment();
+          //  $request->approver_attachment = $this->uploadAttachment();
             $request->save();
             session()->flash('message', 'Request approved!');
 
@@ -103,7 +100,7 @@ class COE extends Component
         if ($request) {
             $request->status = 'Rejected';
             $request->notes = $this->notes;
-            $request->approver_attachment = $this->uploadAttachment();
+            //$request->approver_attachment = $this->uploadAttachment();
             $request->save();
             session()->flash('message', 'Request rejected!');
 
