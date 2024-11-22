@@ -1,7 +1,8 @@
-version: 1
 services:
   - type: web
-    name: HRMS
+    name: hrmo
     env: docker
-    autoDeploy: true
-    dockerComposeFilePath: docker-compose.yml
+    plan: starter
+    buildCommand: docker build -t hrmo .
+    startCommand: docker run your-image-name
+    dockerfilePath: docker/8.2/Dockerfile  # Ensure this is correct
