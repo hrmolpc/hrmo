@@ -62,11 +62,19 @@ class Leave extends Component
     {
         $request = Request::find($requestId);
         if ($request) {
-        
+            // $this->validate([
+            //     'attachment' => 'nullable|file|mimes:pdf,jpg,png|max:10240', // Max size 10MB
+            // ]);
+
+            // if ($this->attachment) {
+            //     // Store the file (e.g., in the 'attachments' folder)
+            //     $path = $this->attachment->store('attachments', 'public');
+            //     $request->attachment_path = $path; // Save file path in database
+            // }
 
             $request->status = 'Approved';
             $request->notes = $this->notes;
-          //  $request->approver_attachment = $this->uploadAttachment();
+           // $request->approver_attachment = $this->uploadAttachment();
             $request->save();
             session()->flash('message', 'Request approved!');
 
@@ -74,7 +82,7 @@ class Leave extends Component
             $employeeFullName = $this->getEmployeeName($request->employee_id);
             session()->flash('message', "Request approved for $employeeFullName!");
 
-           // Mail::to($getEmpEmail)->send(new RequestNotification($request));
+            Mail::to($getEmpEmail)->send(new RequestNotification($request));
             return redirect()->to(request()->header('Referer'));
         }
     }
@@ -85,7 +93,7 @@ class Leave extends Component
         if ($request) {
             $request->status = 'Rejected';
             $request->notes = $this->notes;
-            //$request->approver_attachment = $this->uploadAttachment();
+           // $request->approver_attachment = $this->uploadAttachment();
             $request->save();
             session()->flash('message', 'Request rejected!');
 
@@ -93,7 +101,7 @@ class Leave extends Component
             $employeeFullName = $this->getEmployeeName($request->employee_id);
             session()->flash('message', "Request rejected for $employeeFullName!");
 
-          //  Mail::to($getEmpEmail)->send(new RequestNotification($request));
+            Mail::to($getEmpEmail)->send(new RequestNotification($request));
             return redirect()->to(request()->header('Referer'));
         }
     }

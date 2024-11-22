@@ -18,6 +18,13 @@ class COE extends Component
     public $notes = '';
     public $attachment;
 
+    protected $rules = [
+  
+        'attachment' => 'nullable|file|mimes:pdf,jpeg,png',
+
+    ];
+
+
     public function mount()
     {
     }
@@ -62,56 +69,68 @@ class COE extends Component
     public function uploadAttachment()
     {
         if ($this->attachment) {
-            return $this->attachment->store('attachments', 'public');
+            Log::info('Uploading attachment', ['filename' => $this->attachment->getClientOriginalName()]);
+            return $this->attachment->store('attachments', 'public'); // Save file in 'attachments' directory under 'public' disk
         }
         return null;
     }
 
-
     public function approveRequest($requestId)
-    {
-        $request = Request::find($requestId);
-        if ($request) {
-       
-            // if ($this->attachment) {
-            //     // Store the file (e.g., in the 'attachments' folder)
-            //     $path = $this->attachment->store('attachments', 'public');
-            //     $request->attachment_path = $path; // Save file path in database
-            // }
+{
+    $request = Request::find($requestId);
+    if ($request) {
+        // Perform necessary validations and actions
+        $this->validate([
+            'attachment' => 'nullable|file|mimes:pdf,jpg,png|max:10240',
+        ]);
 
-            $request->status = 'Approved';
-            $request->notes = $this->notes;
-          //  $request->approver_attachment = $this->uploadAttachment();
-            $request->save();
-            session()->flash('message', 'Request approved!');
+        $request->status = 'Approved';
+        $request->notes = $this->notes;
+        $request->approver_attachment = $this->uploadAttachment();
+        $request->save();
 
-            $getEmpEmail = $this->getEmail($request->employee_id);
-            $employeeFullName = $this->getEmployeeName($request->employee_id);
-            session()->flash('message', "Request approved for $employeeFullName!");
+        session()->flash('message', 'Request approved!');
 
-           //Mail::to($getEmpEmail)->send(new RequestNotification($request));
-            return redirect()->to(request()->header('Referer'));
-        }
+        $getEmpEmail = $this->getEmail($request->employee_id);
+        $employeeFullName = $this->getEmployeeName($request->employee_id);
+        session()->flash('message', "Request approved for $employeeFullName!");
+
+        Mail::to($getEmpEmail)->send(new RequestNotification($request));
+
+
+
+        return redirect()->to(request()->header('Referer'));
     }
+}
 
-    public function rejectRequest($requestId)
-    {
-        $request = Request::find($requestId);
-        if ($request) {
-            $request->status = 'Rejected';
-            $request->notes = $this->notes;
-            //$request->approver_attachment = $this->uploadAttachment();
-            $request->save();
-            session()->flash('message', 'Request rejected!');
+public function rejectRequest($requestId)
+{
+    $request = Request::find($requestId);
+    if ($request) {
+        // Perform necessary validations and actions
+        $this->validate([
+            'attachment' => 'nullable|file|mimes:pdf,jpg,png|max:10240',
+        ]);
 
-            $getEmpEmail = $this->getEmail($request->employee_id);
-            $employeeFullName = $this->getEmployeeName($request->employee_id);
-            session()->flash('message', "Request rejected for $employeeFullName!");
+        $request->status = 'Rejected';
+        $request->notes = $this->notes;
+        $request->approver_attachment = $this->uploadAttachment();
+        $request->save();
 
-            //Mail::to($getEmpEmail)->send(new RequestNotification($request));
-            return redirect()->to(request()->header('Referer'));
-        }
+        session()->flash('message', 'Request rejected!');
+
+        $getEmpEmail = $this->getEmail($request->employee_id);
+        $employeeFullName = $this->getEmployeeName($request->employee_id);
+        session()->flash('message', "Request rejected for $employeeFullName!");
+
+        Mail::to($getEmpEmail)->send(new RequestNotification($request));
+
+    
+
+        return redirect()->to(request()->header('Referer'));
     }
+}
+
 
 
     public function confirmDestroyRequest($requestId)

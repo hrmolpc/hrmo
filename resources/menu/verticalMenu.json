@@ -4,7 +4,8 @@
       "url": "/dashboard",
       "name": "Dashboard",
       "icon": "menu-icon tf-icons ti ti-dashboard",
-      "slug": "dashboard"
+      "slug": "dashboard",
+      "role": ["Admin"]
     },
     {
       "menuHeader": "Request Type",

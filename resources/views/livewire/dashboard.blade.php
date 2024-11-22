@@ -89,29 +89,7 @@
       </div>
     
        <div class="announcement-card card mb-4">
-  <div class="card-body">
-    <h5 class="card-title text-danger">
-    <i class="ti ti-alert-triangle"></i> THIS IS FOR COMING SOON! 
-      <i class="ti ti-alert-triangle"></i> Announcement: System Maintenance Scheduled
-    </h5>
-    <p class="card-text">
-      Please note that our platform will undergo <strong>scheduled maintenance</strong> on:
-    </p>
-    <ul>
-      <li><strong>Date:</strong> Saturday, November 25, 2024</li>
-      <li><strong>Time:</strong> 12:00 AM to 6:00 AM (UTC)</li>
-    </ul>
-    <p>
-      During this period, some services may be unavailable. We recommend saving your work and logging out before the maintenance begins.
-    </p>
-    <p>
-      Thank you for your understanding and patience! If you have any questions, feel free to contact 
-      <a href="mailto:support@example.com">support@example.com</a>.
-    </p>
-    <p class="text-info">
-      <i class="ti ti-info-circle"></i> Stay tuned for further updates in the notifications panel.
-    </p>
-  </div>
+
 </div>
 
   
@@ -128,7 +106,6 @@
        
           </div>
         </div>
-        @can('read sms')
         <div class="card-body">
           <div class="row gy-3">
             <div class="col-md-3 col-6">
@@ -170,8 +147,6 @@
             </div>
           </div>
         </div>
-        @endcan
-        @can('create leaves')
         
         <div class="card-body pt-0">
         <div class="d-flex justify-content-between mb-3">
@@ -269,7 +244,7 @@
               </div>
 
         </div>
-        @endcan
+
       </div>
     </div>
 

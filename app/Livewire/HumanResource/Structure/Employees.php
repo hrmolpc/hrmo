@@ -93,7 +93,7 @@ class Employees extends Component
                     'employee_id' => $employee->employee_id,
                     'email' => $employee->email,
                     'password' => bcrypt('default_password'),
-                    'account_type' => 'employee', // Adjust account type as needed
+                    'account_type' => $employee->account_type, // Adjust account type as needed
                 ]);
     
                 // Log the created user

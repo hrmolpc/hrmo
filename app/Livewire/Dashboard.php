@@ -173,7 +173,7 @@ public function getAllMyRequests()
     
             Request::create($data);
     
-          //  Mail::to('hrmolaspinas@gmail.com')->send(new EmployeeRequestNotification($data));
+            Mail::to('hrmolaspinas@gmail.com')->send(new EmployeeRequestNotification($data));
     
             session()->flash('message', 'Request submitted successfully!');
             $this->reset();
@@ -184,7 +184,6 @@ public function getAllMyRequests()
             logger()->error('Request submission failed: ' . $e->getMessage());
         }
     }
-    
 
 
     public function confirmDestroyRequest($requestId)
@@ -215,9 +214,9 @@ public function getAllMyRequests()
             }
     
             // Reset the confirmedId after deletion
+            $this->confirmedId = null;
 
             return redirect()->to(request()->header('Referer'));
-            $this->confirmedId = null;
         } else {
             Log::error('Confirmed ID is null', ['confirmed_id' => $this->confirmedId]);
         }
