@@ -73,11 +73,11 @@ class COE extends Component
         $request = Request::find($requestId);
         if ($request) {
        
-            if ($this->attachment) {
-                // Store the file (e.g., in the 'attachments' folder)
-                $path = $this->attachment->store('attachments', 'public');
-                $request->attachment_path = $path; // Save file path in database
-            }
+            // if ($this->attachment) {
+            //     // Store the file (e.g., in the 'attachments' folder)
+            //     $path = $this->attachment->store('attachments', 'public');
+            //     $request->attachment_path = $path; // Save file path in database
+            // }
 
             $request->status = 'Approved';
             $request->notes = $this->notes;
@@ -89,7 +89,7 @@ class COE extends Component
             $employeeFullName = $this->getEmployeeName($request->employee_id);
             session()->flash('message', "Request approved for $employeeFullName!");
 
-            Mail::to($getEmpEmail)->send(new RequestNotification($request));
+           //Mail::to($getEmpEmail)->send(new RequestNotification($request));
             return redirect()->to(request()->header('Referer'));
         }
     }
@@ -108,7 +108,7 @@ class COE extends Component
             $employeeFullName = $this->getEmployeeName($request->employee_id);
             session()->flash('message', "Request rejected for $employeeFullName!");
 
-            Mail::to($getEmpEmail)->send(new RequestNotification($request));
+            //Mail::to($getEmpEmail)->send(new RequestNotification($request));
             return redirect()->to(request()->header('Referer'));
         }
     }

@@ -173,7 +173,7 @@ public function getAllMyRequests()
     
             Request::create($data);
     
-            Mail::to('hrmolaspinas@gmail.com')->send(new EmployeeRequestNotification($data));
+          //  Mail::to('hrmolaspinas@gmail.com')->send(new EmployeeRequestNotification($data));
     
             session()->flash('message', 'Request submitted successfully!');
             $this->reset();
@@ -184,6 +184,7 @@ public function getAllMyRequests()
             logger()->error('Request submission failed: ' . $e->getMessage());
         }
     }
+    
 
 
     public function confirmDestroyRequest($requestId)

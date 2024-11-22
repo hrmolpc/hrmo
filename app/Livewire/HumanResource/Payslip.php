@@ -75,7 +75,7 @@ class Payslip extends Component
             $employeeFullName = $this->getEmployeeName($request->employee_id);
             session()->flash('message', "Request approved for $employeeFullName!");
 
-            Mail::to($getEmpEmail)->send(new RequestNotification($request));
+           // Mail::to($getEmpEmail)->send(new RequestNotification($request));
             return redirect()->to(request()->header('Referer'));
         }
     }
@@ -94,7 +94,7 @@ class Payslip extends Component
             $employeeFullName = $this->getEmployeeName($request->employee_id);
             session()->flash('message', "Request rejected for $employeeFullName!");
 
-            Mail::to($getEmpEmail)->send(new RequestNotification($request));
+           // Mail::to($getEmpEmail)->send(new RequestNotification($request));
             return redirect()->to(request()->header('Referer'));
         }
     }
