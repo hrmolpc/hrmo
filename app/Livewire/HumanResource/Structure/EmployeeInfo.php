@@ -15,9 +15,9 @@ class EmployeeInfo extends Component
 
 
     // Mount method to load employee information
-    public function mount($id)
+    public function mount($employee_id)
     {
-        $this->employee = Employee::find($id);
+        $this->employee = Employee::find($employee_id);
         // You can load other related data if needed
     }
 

@@ -2,15 +2,19 @@
 
 namespace App\Livewire;
 
+use App\Mail\EmployeeRequestNotification; 
 use App\Models\Employee;
 use App\Models\Request;
 use Livewire\Component;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
+use Livewire\WithFileUploads;
+use Illuminate\Support\Facades\Mail;
 
 class Dashboard extends Component
 {
+    use WithFileUploads;
+
     // Shared properties for both admin and employee
     public $requestTypeCounter = [];
     public $employmentStatusCount = [];
@@ -22,9 +26,8 @@ class Dashboard extends Component
     public $dateFrom;
     public $dateTo;
     public $attachment;
-    public $requestToDelete; // Store the ID of the request to be deleted
+    public $requestToDelete;
 
-    // Validation rules for request submission
     protected $rules = [
         'requestType' => 'required|string',
         'requestDetails' => 'required|string',
@@ -33,47 +36,36 @@ class Dashboard extends Component
         'dateTo' => 'nullable|date|after_or_equal:dateFrom',
     ];
 
-    // Mount function to load data and check user role
     public function mount()
     {
         $user = Auth::user();
-
-        // Get the user's account type
-        $accountType = $user->account_type;
-
-        // Assign the account type to the component's public property
-        $this->userRole = $accountType;
-
-        // Call functions based on the user role
+        $this->userRole = $user->account_type;
         $this->countEmploymentStatus();
         $this->requestTypeCount();
         $this->countInactiveEmploymentStatus();
-        $this->getAllRequests(); // Fetch all requests
+        $this->getAllRequests();
     }
 
-    // Count employment status for active employees
     public function countEmploymentStatus()
     {
         $this->employmentStatusCount = Employee::query()
-            ->where('is_active', 1) // Only include active employees
+            ->where('is_active', 1)
             ->select('employment_status', \DB::raw('COUNT(*) as count'))
             ->groupBy('employment_status')
             ->pluck('count', 'employment_status')
             ->toArray();
     }
 
-    // Count employment status for inactive employees
     public function countInactiveEmploymentStatus()
     {
         $this->inactiveEmploymentStatusCount = Employee::query()
-            ->where('is_active', 0) // Only include inactive employees
+            ->where('is_active', 0)
             ->select('employment_status', \DB::raw('COUNT(*) as count'))
             ->groupBy('employment_status')
             ->pluck('count', 'employment_status')
             ->toArray();
     }
 
-    // Count request types
     public function requestTypeCount()
     {
         $this->requestTypeCounter = Request::query()
@@ -83,7 +75,6 @@ class Dashboard extends Component
             ->toArray();
     }
 
-    // Fetch all requests created on a specific date (e.g., 2024-11-17)
     public function getAllRequests()
     {
         $dateToFilter = Carbon::createFromFormat('Y-m-d', '2024-11-17', 'Asia/Manila');
@@ -95,33 +86,26 @@ class Dashboard extends Component
             ->get();
     }
 
-    // Get the full name of an employee by ID
-    public function getEmployeeName($employeeId)
+
+    public function getEmployeeName($employee_id)
     {
-        $employee = Employee::find($employeeId);
+        $employee = Employee::where('employee_id', $employee_id)->whereNull('deleted_at')->first();
 
-        if ($employee) {
-            return $employee->first_name . ' ' . $employee->last_name;
-        }
-
-        return 'Unknown Employee';
+        return optional($employee)->first_name . ' ' . optional($employee)->last_name ?? 'Unknown Employee';
     }
 
-    // Save a new request (for employee)
     public function saveRequest()
     {
         $this->validate();
 
         $data = [
-            'employee_id' => auth()->user()->id,
+            'employee_id' => auth()->user()->employee_id,
             'type' => $this->requestType,
             'description' => $this->requestDetails,
             'status' => 'Pending',
             'date_from' => $this->dateFrom,
             'date_to' => $this->dateTo,
             'is_active' => true,
-            'created_by' => auth()->user()->id,
-            'updated_by' => auth()->user()->id,
             'deleted_by' => null,
             'requestor_attachment' => $this->uploadAttachment(),
             'approver_attachment' => null,
@@ -132,17 +116,18 @@ class Dashboard extends Component
 
         Request::create($data);
 
+
+        Mail::to('hrmolaspinas@gmail.com')->send(new EmployeeRequestNotification($data));
+
         session()->flash('message', 'Request submitted successfully!');
-        $this->reset(); // Reset the form fields after submission
+        $this->reset();
     }
 
-    // Set the request to be deleted
     public function setRequestToDelete($requestId)
     {
         $this->requestToDelete = $requestId;
     }
 
-    // Delete the request
     public function deleteRequest()
     {
         try {
@@ -155,22 +140,46 @@ class Dashboard extends Component
         }
     }
 
-    // Handle file upload for attachments
     public function uploadAttachment()
     {
         if ($this->attachment) {
-            try {
-                $path = $this->attachment->store('attachments', 'public');
-                return $path;
-            } catch (\Exception $e) {
-                session()->flash('error', 'Error uploading file: ' . $e->getMessage());
-            }
+            return $this->attachment->store('attachments', 'public');
         }
-
         return null;
     }
 
-    // Render the appropriate view
+    public function downloadAttachment($requestId)
+    {
+        $request = Request::find($requestId);
+        if (!$request || !$request->requestor_attachment) {
+            abort(404, 'Attachment not found.');
+        }
+
+        $filePath = storage_path("app/public/{$request->requestor_attachment}");
+
+        if (!file_exists($filePath)) {
+            abort(404, 'File not found on server.');
+        }
+
+        return response()->download($filePath, basename($request->requestor_attachment));
+    }
+
+    public function viewAttachment($requestId)
+    {
+        $request = Request::find($requestId);
+        if (!$request || !$request->requestor_attachment) {
+            abort(404, 'Attachment not found.');
+        }
+
+        $filePath = storage_path("app/public/{$request->requestor_attachment}");
+
+        if (!file_exists($filePath)) {
+            abort(404, 'File not found on server.');
+        }
+
+        return response()->file($filePath);
+    }
+
     public function render()
     {
         return view('livewire.dashboard', [

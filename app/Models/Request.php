@@ -19,4 +19,9 @@ class Request extends Model
         'is_active', 'created_by', 'updated_by', 'deleted_by', 
         'requestor_attachment', 'approver_attachment'
     ];
+
+    public function employee()
+    {
+        return $this->belongsTo(Employee::class);
+    }
 }

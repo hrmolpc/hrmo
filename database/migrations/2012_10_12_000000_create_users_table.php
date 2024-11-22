@@ -3,7 +3,6 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
-
 return new class extends Migration
 {
     /**
@@ -14,7 +13,8 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->foreignId('employee_id')->nullable()->constrained();
+            $table->string('employee_id')->nullable(); // Reference to employee_id in employees table
+            $table->foreign('employee_id')->references('employee_id')->on('employees')->onDelete('cascade'); // Foreign key constraint
             $table->string('email')->nullable()->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');

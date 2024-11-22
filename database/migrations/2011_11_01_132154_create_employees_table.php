@@ -6,15 +6,11 @@ use Illuminate\Support\Facades\Schema;
 
 class CreateEmployeesTable extends Migration
 {
-    /**
-     * Run the migrations.
-     *
-     * @return void
-     */
     public function up()
     {
         Schema::create('employees', function (Blueprint $table) {
-            $table->id();
+            // Make employee_id the primary key and NOT NULL
+            $table->string('employee_id')->primary(); // This ensures employee_id is unique and the primary key
             $table->string('first_name')->nullable();
             $table->string('last_name')->nullable();
             $table->string('gender')->nullable();
@@ -23,7 +19,6 @@ class CreateEmployeesTable extends Migration
             $table->date('birthday')->nullable();
             $table->string('nationality')->nullable();
             $table->string('address')->nullable();
-            $table->string('employee_id')->unique()->nullable();
             $table->string('employment_status')->nullable();
             $table->date('start_date')->nullable();
             $table->string('position')->nullable();
@@ -42,11 +37,6 @@ class CreateEmployeesTable extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     *
-     * @return void
-     */
     public function down()
     {
         Schema::dropIfExists('employees');

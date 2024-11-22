@@ -38,7 +38,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified'])->group(function () {
     // 👉 Dashboard
-    Route::group(['middleware' => ['role:Admin|Employee|AM|CC|CR|HR']], function () {
+    Route::group(['middleware' => ['role:Admin|Employee']], function () {
         Route::redirect('/', '/dashboard');
         Route::get('/dashboard', Dashboard::class)->name('dashboard');
     });
@@ -51,7 +51,7 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
           
        
             Route::get('/employees', Employees::class)->name('structure-employees');
-            Route::get('/employee/{id?}', EmployeeInfo::class)->name('structure-employees-info');
+            Route::get('/employee/{employee_id?}', EmployeeInfo::class)->name('structure-employees-info');
         });
     });
 
@@ -73,6 +73,10 @@ Route::middleware(['auth:sanctum', config('jetstream.auth_session'), 'verified']
     Route::group(['middleware' => ['role:Employee|Admin|AM|HR']], function () {
         Route::get('/assets/reports', ComingSoon::class)->name('reports');
     });
+
+    Route::get('/request/{id}/download', [Dashboard::class, 'downloadAttachment'])->name('download.attachment');
+Route::get('/request/{id}/view', [Dashboard::class, 'viewAttachment'])->name('view.attachment');
+
 });
 
  

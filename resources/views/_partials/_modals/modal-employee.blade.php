@@ -91,13 +91,10 @@
                     <div class="col-12 mb-4 form-section">
                         <div class="section-title">{{ __('Employment Information') }}</div>
                         <div class="row">
-                        <div class="col-md-4">             
-    <label class="form-label">{{ __('Employee ID') }}</label>             
-    
-    <input class="form-control" type="text" value="{{ $isEdit ? $employeeInfo['employee_id'] : $this->generateUniqueEmployeeId() }}" readonly/>      
-    
-    
-</div>
+                            <div class="col-md-4">             
+                                <label class="form-label">{{ __('Employee ID') }}</label>             
+                                <input class="form-control" type="text" value="{{ $isEdit && isset($employeeInfo['employee_id']) ? $employeeInfo['employee_id'] : $this->generateUniqueEmployeeId() }}" readonly/>
+                                </div>
 
                             <div class="col-md-4">             
                                 <label class="form-label">{{ __('Employment Status') }}</label>             
@@ -129,8 +126,8 @@
                             </div>
                             <div class="col-md-4">             
                                 <label class="form-label">{{ __('Account Type') }}</label>             
-                                <select class="form-select" wire:model="employeeInfo.employment_status" required>               
-                                    <option value="" disabled selected>{{ __('Select Status') }}</option>               
+                                <select class="form-select" wire:model="employeeInfo.account_type" required>               
+                                    <option value="" disabled selected>{{ __('Select Type') }}</option>               
                                     <option value="employee">{{ __('Employee') }}</option>               
                                     <option value="admin">{{ __('Admin') }}</option>               
                                              
@@ -145,7 +142,7 @@
                         <div class="row">
                             <div class="col-md-4">             
                                 <label class="form-label">{{ __('Emergency Contact Name') }}</label>             
-                                <input type="text" class="form-control" wire:model="employeeInfo.emergency_contact_name" placeholder="Emergency Contact Number" required/>           
+                                <input type="text" class="form-control" wire:model="employeeInfo.emergency_contact_name" placeholder="Emergency Contact Name" required/>           
                             </div>           
                             <div class="col-md-4">             
                                 <label class="form-label">{{ __('Emergency Contact Number') }}</label>             

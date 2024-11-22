@@ -69,18 +69,7 @@
                     Employee Requests
                 </h5>
                 <div class="table-responsive text-nowrap">
-                    <div class="row mx-4 mb-3">
-                        <div class="col-md-4">
-                            <label class="form-label w-100">Filter by Request</label>
-                            <select wire:model='statusFilter' class="form-select @error('statusFilter') is-invalid @enderror">
-                                <option value="">Select Request</option>
-                                <option value="Pending">Certificate of Employment</option>
-                                <option value="Completed">Payslip</option>
-                                <option value="Rejected">Leave</option>
-                                <option value="Rejected">Service Records</option>
-                            </select>
-                        </div>
-                    </div>
+                 
 
                     <table class="table table-hover">
                         <thead>

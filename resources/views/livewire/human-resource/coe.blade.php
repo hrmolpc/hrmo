@@ -41,7 +41,7 @@
                                             <td><strong>{{ $request->id }}</strong></td>
                                             <td class="td">{{ $this->getEmployeeName($request->employee_id) }}</td>
                                             <td style="text-align: center">{{ \Carbon\Carbon::parse($request->created_at)->format('F j, Y') }}</td>
-
+                                       
                                             <td style="text-align: center">{{ $request->status }}</td>
                                             <td style="text-align: center">
                                                 <!-- View Button -->
@@ -133,49 +133,50 @@
                                 <h6 class="card-title text-muted mb-3">
                                     <i class="bi bi-paperclip me-2"></i>Attachments
                                 </h6>
-                                @if($request->attachments && count($request->attachments) > 0)
-                                    <div class="list-group">
-                                        @foreach($request->attachments as $attachment)
-                                            <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                                                <div class="d-flex align-items-center">
-                                                    <i class="bi 
-                                                        @switch(pathinfo($attachment->file_name, PATHINFO_EXTENSION))
-                                                            @case('pdf') bi-file-pdf text-danger @break
-                                                            @case('doc')
-                                                            @case('docx') bi-file-word text-primary @break
-                                                            @case('xls')
-                                                            @case('xlsx') bi-file-excel text-success @break
-                                                            @case('jpg')
-                                                            @case('jpeg')
-                                                            @case('png')
-                                                            @case('gif') bi-file-image text-info @break
-                                                            @default bi-file text-secondary
-                                                        @endswitch
-                                                    me-3 fs-4"></i>
-                                                    <span>{{ $attachment->file_name }}</span>
-                                                </div>
-                                                <div class="btn-group" role="group">
-                                                    <a href="{{ route('download.attachment', $attachment->id) }}" 
-                                                       class="btn btn-sm btn-outline-primary" 
-                                                       title="Download">
-                                                        <i class="bi bi-download"></i>
-                                                    </a>
-                                                    <button 
-                                                        onclick="window.open('{{ route('view.attachment', $attachment->id) }}', '_blank')" 
-                                                        class="btn btn-sm btn-outline-secondary" 
-                                                        title="View">
-                                                        <i class="bi bi-eye"></i>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                @else
-                                    <div class="alert alert-light text-muted text-center" role="alert">
-                                        <i class="bi bi-exclamation-circle me-2"></i>
-                                        No attachments found
-                                    </div>
-                                @endif
+                                @if ($request->requestor_attachment)
+                <div class="list-group mb-3">
+                    <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <i class="bi 
+                                @switch(pathinfo($request->requestor_attachment, PATHINFO_EXTENSION))
+                                    @case('pdf') bi-file-pdf text-danger @break
+                                    @case('doc') 
+                                    @case('docx') bi-file-word text-primary @break
+                                    @case('xls') 
+                                    @case('xlsx') bi-file-excel text-success @break
+                                    @case('jpg') 
+                                    @case('jpeg') 
+                                    @case('png') 
+                                    @case('gif') bi-file-image text-info @break
+                                    @default bi-file text-secondary
+                                @endswitch
+                            me-3 fs-4"></i>
+                            <span>{{ basename($request->requestor_attachment) }}</span>
+                        </div>
+                        <div class="btn-group" role="group">
+                            <a href="{{ route('download.attachment', $request->id) }}" 
+                               class="btn btn-sm btn-outline-primary" 
+                               title="Download">
+                                <i class="bi bi-download">Download</i>
+                            </a>
+                            <button 
+                                onclick="window.open('{{ route('view.attachment', $request->id) }}', '_blank')" 
+                                class="btn btn-sm btn-outline-secondary" 
+                                title="View">
+                                <i class="bi bi-eye">View</i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            @endif
+ 
+
+            {{-- No Attachments --}}
+            @if (!$request->requestor_attachment && (!$request->attachments || $request->attachments->count() === 0))
+                <div class="alert alert-light text-muted text-center" role="alert">
+                    <i class="bi bi-exclamation-circle me-2"></i>No attachments found.
+                </div>
+            @endif
                             </div>
                         </div>
                     </div>
