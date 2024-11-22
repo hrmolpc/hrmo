@@ -236,7 +236,7 @@
                                 <!-- Comment Section -->
                                 <div class="mb-3">
                                     <label for="approverComment" class="form-label"><i class="bi bi-pencil me-1"></i>Notes:</label>
-                                    <textarea class="form-control" id="approverComment" rows="3" placeholder="Enter your notes here..."></textarea>
+                                    <textarea class="form-control" id="approverComment" wire:model="notes" rows="3" placeholder="Enter your notes here..."></textarea>
                                 </div>
 
                                 <!-- Attachment Section -->

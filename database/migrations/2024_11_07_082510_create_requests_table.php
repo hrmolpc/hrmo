@@ -24,6 +24,8 @@ class CreateRequestsTable extends Migration
             $table->date('date_to')->nullable();
             $table->boolean('is_active')->default(1);
 
+            $table->text('notes')->nullable();
+
             // Metadata for user actions (created, updated, deleted by)
             $table->foreignId('created_by')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignId('updated_by')->nullable()->constrained('users')->onDelete('set null');

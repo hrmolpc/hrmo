@@ -23,7 +23,7 @@
             <div class="row mt-3">
                 <div class="col">
                     <div class="card">
-                        <h5 class="card-header">{{ __('Certificate of Employment')}}</h5>
+                        <h5 class="card-header">{{ __('Leave Requests')}}</h5>
                         <div class="table-responsive text-nowrap">
                             <table class="table table-hover">
                                 <thead>
@@ -48,7 +48,7 @@
                                                 <button type="button" class="btn btn-sm btn-tr rounded-pill btn-icon btn-outline-secondary waves-effect" data-bs-toggle="modal" data-bs-target="#viewModal-{{ $request->id }}">
                                                     <span class="ti ti-eye"></span>
                                                 </button>
-
+                                
                                                 <!-- Approve/Reject Buttons -->
                                                 @if ($request->status == 'Pending')
                                                     <button type="button" class="btn btn-sm btn-success rounded-pill btn-icon waves-effect" data-bs-toggle="modal" data-bs-target="#approveRejectModal-{{ $request->id }}">
@@ -192,8 +192,8 @@
     </div>
 </div>
 
-                                        <!-- Approve/Reject Modal -->
-                                        <div class="modal fade" id="approveRejectModal-{{ $request->id }}" tabindex="-1" aria-labelledby="approveRejectModalLabel" aria-hidden="true">
+                                    <!-- Approve/Reject Modal -->
+<div class="modal fade" id="approveRejectModal-{{ $request->id }}" tabindex="-1" aria-labelledby="approveRejectModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow-lg">
             <div class="modal-header bg-primary text-white py-3">
@@ -236,13 +236,22 @@
                                 <!-- Comment Section -->
                                 <div class="mb-3">
                                     <label for="approverComment" class="form-label"><i class="bi bi-pencil me-1"></i>Notes:</label>
-                                    <textarea class="form-control" id="approverComment" rows="3" placeholder="Enter your notes here..."></textarea>
+                                    <textarea class="form-control" id="approverComment" wire:model="notes" rows="3" placeholder="Enter your notes here..."></textarea>
                                 </div>
 
                                 <!-- Attachment Section -->
-                                <div class="mb-3">
-                                    <label for="approverAttachment" class="form-label"><i class="bi bi-paperclip me-1"></i>Attachment:</label>
-                                    <input class="form-control" type="file" id="approverAttachment">
+                                <div class="mb-4">
+                                    <label for="approverAttachment" class="form-label text-muted fw-medium">
+                                        <i class="bi bi-paperclip me-2"></i>Attachment
+                                    </label>
+                                    <input 
+                                        id="approverAttachment"
+                                        type="file" 
+                                        class="form-control border-0 bg-light" 
+                                        wire:model="attachment">
+                                    @error('attachment') 
+                                        <small class="text-danger">{{ $message }}</small>
+                                    @enderror
                                 </div>
 
                             </div>
@@ -254,16 +263,18 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                     <i class="bi bi-x-circle me-2"></i>Cancel
                 </button>
-                <button type="button" class="btn btn-success" wire:click.prevent="approveRequest({{ $request->id }}, document.getElementById('approverComment').value, document.getElementById('approverAttachment').files[0])" data-bs-dismiss="modal">
+                <button type="button" class="btn btn-success" wire:click.prevent="approveRequest({{ $request->id }}, document.getElementById('approverComment').value, document.getElementById('approverAttachment').files[0])">
                     <i class="bi bi-check-circle me-2"></i>Approve
                 </button>
-                <button type="button" class="btn btn-danger" wire:click.prevent="rejectRequest({{ $request->id }}, document.getElementById('approverComment').value, document.getElementById('approverAttachment').files[0])" data-bs-dismiss="modal">
+                <button type="button" class="btn btn-danger" wire:click.prevent="rejectRequest({{ $request->id }}, document.getElementById('approverComment').value, document.getElementById('approverAttachment').files[0])">
                     <i class="bi bi-x-circle me-2"></i>Reject
                 </button>
             </div>
         </div>
     </div>
 </div>
+
+
 
 
                                         <!-- Delete Modal -->
@@ -349,4 +360,14 @@
     background: linear-gradient(135deg, #3b8132 0%, #FFFFFF 100%);
 }
 </style>
+
+<script>
+    window.addEventListener('close-modal', event => {
+        var modalId = event.detail.modalId;
+        var modalElement = document.getElementById(modalId);
+        var modal = new bootstrap.Modal(modalElement);
+        modal.hide();
+    });
+</script>
+
 </div>

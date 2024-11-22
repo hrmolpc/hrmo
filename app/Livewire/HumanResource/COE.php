@@ -9,11 +9,14 @@ use App\Models\Request; // Import Request model
 use Livewire\WithPagination;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Livewire\WithFileUploads;
 
 class COE extends Component
 {
+    use WithFileUploads;
     public $confirmedId = null; // Store confirmed request ID for deletion
-
+    public $notes = '';
+    public $attachment;
 
     public function mount()
     {
@@ -36,14 +39,33 @@ class COE extends Component
         // If the employee is not found, return a default name
         return 'Unknown Employee';
     }
-    
-    
+
+    public function uploadAttachment()
+    {
+        if ($this->attachment) {
+            return $this->attachment->store('attachments', 'public');
+        }
+        return null;
+    }
+
 
     public function approveRequest($requestId)
     {
         $request = Request::find($requestId);
         if ($request) {
+            $this->validate([
+                'attachment' => 'nullable|file|mimes:pdf,jpg,png|max:10240', // Max size 10MB
+            ]);
+
+            if ($this->attachment) {
+                // Store the file (e.g., in the 'attachments' folder)
+                $path = $this->attachment->store('attachments', 'public');
+                $request->attachment_path = $path; // Save file path in database
+            }
+
             $request->status = 'Approved';
+            $request->notes = $this->notes;
+            $request->approver_attachment = $this->uploadAttachment();
             $request->save();
             session()->flash('message', 'Request approved!');
 
@@ -60,6 +82,8 @@ class COE extends Component
         $request = Request::find($requestId);
         if ($request) {
             $request->status = 'Rejected';
+            $request->notes = $this->notes;
+            $request->approver_attachment = $this->uploadAttachment();
             $request->save();
             session()->flash('message', 'Request rejected!');
 

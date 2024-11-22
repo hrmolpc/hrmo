@@ -494,83 +494,188 @@
     </div>
 </div>
 
+
 {{-- View Request Modal --}}
 @foreach($requests as $request)
-    <div class="modal fade" id="viewRequestModal{{ $request->id }}" tabindex="-1" aria-labelledby="viewRequestModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content border-0 shadow-lg">
-                <div class="modal-header bg-primary text-white py-3">
-                    <div class="d-flex align-items-center">
-                        <span class="badge bg-light text-primary me-3">{{ $request->type }}</span>
-                        <h5 class="modal-title">Request Details</h5>
-                    </div>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+<div class="modal fade" id="viewRequestModal{{ $request->id }}" tabindex="-1" aria-labelledby="viewRequestModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-primary text-white py-3">
+                <div class="d-flex align-items-center">
+                    <span class="badge bg-light text-primary me-3">{{ $request->type }}</span>
+                    <h5 class="modal-title">Request Details</h5>
                 </div>
-                <div class="modal-body">
-                    <div class="row g-4">
-                        <div class="col-md-6">
-                            <div class="card border-0 h-100">
-                                <div class="card-body">
-                                    <h6 class="card-title text-muted mb-3">
-                                        Request Information
-                                    </h6>
-                                    <ul class="list-unstyled">
-                                        <li class="mb-2">
-                                            <span class="fw-bold text-muted me-2"><i class="bi bi-calendar-check me-1"></i>Request Date:</span>
-                                            {{ \Carbon\Carbon::parse($request->created_at)->format('F j, Y') }}
-                                        </li>
-
-                                        <li class="mb-2">
-                                            <span class="fw-bold text-muted me-2"><i class="bi bi-check-circle me-1"></i>Status:</span>
-                                            <span class="badge 
-                                                @switch($request->status)
-                                                    @case('Approved') bg-success @break
-                                                    @case('Pending') bg-warning @break
-                                                    @case('Rejected') bg-danger @break
-                                                    @default bg-secondary
-                                                @endswitch
-                                            ">
-                                                {{ $request->status }}
-                                            </span>
-                                        </li>
-                                        <li class="mb-2">
-                                            <span class="fw-bold text-muted me-2"><i class="bi bi-tag me-1"></i>Request Type:</span>
-                                            {{ $request->type }}
-                                        </li>
-                                        @if($request->type == 'Leave')
-                                            <li class="mb-2">
-                                                <span class="fw-bold text-muted me-2"><i class="bi bi-calendar3 me-1"></i>Leave Dates:</span>
-                                                {{ \Carbon\Carbon::parse($request->date_from)->format('F j, Y') }} - {{ \Carbon\Carbon::parse($request->date_to)->format('F j, Y') }}
-                                            </li>
-                                        @endif
-                                        <li class="mb-2">
-                                            <span class="fw-bold text-muted me-2"><i class="bi bi-file-earmark-text me-1"></i>Reason:</span>
-                                            {{ $request->details }}
-                                        </li>
-                                    </ul>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-4">
+                    <div class="col-md-6">
+                        <div class="card border-0 h-100">
+                            <div class="card-body">
+                                <h6 class="card-title text-muted mb-3">
+                                    Request Information
+                                </h6>
+                                <ul class="list-unstyled">
+                                    <li class="mb-2">
+                                        <span class="fw-bold text-muted me-2"><i class="bi bi-calendar-check me-1"></i>Request Date:</span>
+                                        {{ \Carbon\Carbon::parse($request->created_at)->format('F j, Y') }}
+                                    </li>
+                                    <li class="mb-2">
+                                        <span class="fw-bold text-muted me-2"><i class="bi bi-check-circle me-1"></i>Status:</span>
+                                        <span class="badge 
+                                            @switch($request->status)
+                                                @case('Approved') bg-success @break
+                                                @case('Pending') bg-warning @break
+                                                @case('Rejected') bg-danger @break
+                                                @default bg-secondary
+                                            @endswitch
+                                        ">
+                                            {{ $request->status }}
+                                        </span>
+                                    </li>
+                                    <li class="mb-2">
+                                        <span class="fw-bold text-muted me-2"><i class="bi bi-tag me-1"></i>Type:</span>
+                                        {{ $request->type }}
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card border-0 h-100">
+                            <div class="card-body">
+                                <h6 class="card-title text-muted mb-3">
+                                    <i class="bi bi-journal-text me-2"></i>Description
+                                </h6>
+                                <div class="alert alert-light border-0" role="alert">
+                                    <p class="mb-0">{{ $request->description }}</p>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="col-md-6">
-                            <div class="card border-0 h-100">
-                                <div class="card-body">
-                                    <h6 class="card-title text-muted mb-3">Attachments</h6>
-                                    @if($request->attachment)
-                                        <a href="{{ Storage::url($request->attachment) }}" target="_blank" class="btn btn-light w-100">
-                                            <i class="bi bi-download me-2"></i>Download Attachment
-                                        </a>
-                                    @else
-                                        <div class="alert alert-warning">No attachments found.</div>
-                                    @endif
-                                </div>
+                    <!-- Attachments Section -->
+                    <div class="col-12">
+                        <div class="card border-0">
+                            <div class="card-body">
+                                <h6 class="card-title text-muted mb-3">
+                                    <i class="bi bi-paperclip me-2"></i>Your Attachments
+                                </h6>
+
+                                {{-- Single Attachment (requestor_attachment column) --}}
+                                @if ($request->requestor_attachment)
+                                    <div class="list-group mb-3">
+                                        <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                            <div class="d-flex align-items-center">
+                                                <i class="bi 
+                                                    @switch(pathinfo($request->requestor_attachment, PATHINFO_EXTENSION))
+                                                        @case('pdf') bi-file-pdf text-danger @break
+                                                        @case('doc') 
+                                                        @case('docx') bi-file-word text-primary @break
+                                                        @case('xls') 
+                                                        @case('xlsx') bi-file-excel text-success @break
+                                                        @case('jpg') 
+                                                        @case('jpeg') 
+                                                        @case('png') 
+                                                        @case('gif') bi-file-image text-info @break
+                                                        @default bi-file text-secondary
+                                                    @endswitch
+                                                me-3 fs-4"></i>
+                                                <span>{{ basename($request->requestor_attachment) }}</span>
+                                            </div>
+                                            <div class="btn-group" role="group">
+                                                <a href="{{ route('download.attachment', $request->id) }}" 
+                                                   class="btn btn-sm btn-outline-primary" 
+                                                   title="Download">
+                                                    <i class="bi bi-download">Download</i>
+                                                </a>
+                                                <button 
+                                                    onclick="window.open('{{ route('view.attachment', $request->id) }}', '_blank')" 
+                                                    class="btn btn-sm btn-outline-secondary" 
+                                                    title="View">
+                                                    <i class="bi bi-eye">View</i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
+
+                                {{-- No Attachments --}}
+                                @if (!$request->requestor_attachment && (!$request->attachments || $request->attachments->count() === 0))
+                                    <div class="alert alert-light text-muted text-center" role="alert">
+                                        <i class="bi bi-exclamation-circle me-2"></i>No attachments found.
+                                    </div>
+                                @endif
                             </div>
+                        </div>
+                    </div>
+
+                    <div class="card border-0">
+                            <div class="card-body">
+                                <h6 class="card-title text-muted mb-3">
+                                    Notes from Approver
+                                </h6>
+                                <p class="mb-0">{{ $request->notes }}</p>
+                            </div>
+                        </div>
+
+                    <div class="card border-0">
+                        <div class="card-body">
+                            <h6 class="card-title text-muted mb-3">
+                                <i class="bi bi-paperclip me-2"></i>Approver's Attachments
+                            </h6>
+
+                            {{-- Single Attachment (requestor_attachment column) --}}
+                            @if ($request->approver_attachment)
+                                <div class="list-group mb-3">
+                                    <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                        <div class="d-flex align-items-center">
+                                            <i class="bi 
+                                                @switch(pathinfo($request->requestor_attachment, PATHINFO_EXTENSION))
+                                                    @case('pdf') bi-file-pdf text-danger @break
+                                                    @case('doc') 
+                                                    @case('docx') bi-file-word text-primary @break
+                                                    @case('xls') 
+                                                    @case('xlsx') bi-file-excel text-success @break
+                                                    @case('jpg') 
+                                                    @case('jpeg') 
+                                                    @case('png') 
+                                                    @case('gif') bi-file-image text-info @break
+                                                    @default bi-file text-secondary
+                                                @endswitch
+                                            me-3 fs-4"></i>
+                                            <span>{{ basename($request->approver_attachment) }}</span>
+                                        </div>
+                                        <div class="btn-group" role="group">
+                                            <a href="{{ route('download.attachment', $request->id) }}" 
+                                               class="btn btn-sm btn-outline-primary" 
+                                               title="Download">
+                                                <i class="bi bi-download">Download</i>
+                                            </a>
+                                            <button 
+                                                onclick="window.open('{{ route('view.attachment', $request->id) }}', '_blank')" 
+                                                class="btn btn-sm btn-outline-secondary" 
+                                                title="View">
+                                                <i class="bi bi-eye">View</i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endif
+
+                            {{-- No Attachments --}}
+                            @if (!$request->approver_attachment && (!$request->attachments || $request->attachments->count() === 0))
+                                <div class="alert alert-light text-muted text-center" role="alert">
+                                    <i class="bi bi-exclamation-circle me-2"></i>No attachments found.
+                                </div>
+                            @endif
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+</div>
 @endforeach
 
 

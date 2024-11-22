@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Mail;
 class Payslip extends Component
 {
     public $confirmedId = null; // Store confirmed request ID for deletion
-
+    public $notes = '';
 
     public function mount()
     {
@@ -44,6 +44,7 @@ class Payslip extends Component
         $request = Request::find($requestId);
         if ($request) {
             $request->status = 'Approved';
+            $request->notes = $this->notes;
             $request->save();
             session()->flash('message', 'Request approved!');
 
@@ -60,6 +61,7 @@ class Payslip extends Component
         $request = Request::find($requestId);
         if ($request) {
             $request->status = 'Rejected';
+            $request->notes = $this->notes;
             $request->save();
             session()->flash('message', 'Request rejected!');
 

@@ -81,17 +81,9 @@
             <button type="button" class="btn btn-sm btn-tr rounded-pill btn-icon btn-outline-secondary waves-effect">
                 <span wire:click='showEditEmployeeModal({{ $employee }})' data-bs-toggle="modal" data-bs-target="#employeeModal" class="ti ti-pencil"></span>
             </button>
+          
             
-            <button type="button" class="btn btn-sm btn-tr rounded-pill btn-icon btn-outline-danger waves-effect" 
-                    wire:click.prevent='confirmDeleteEmployee({{ $employee->employee_id }})'>
-                <span class="ti ti-trash"></span>
-            </button>
-            
-            @if ($confirmedId === $employee->employee_id)
-                <button wire:click.prevent='deleteEmployee' type="button" class="btn btn-sm btn-danger waves-effect waves-light">
-                    {{ __('Sure?') }}
-                </button>
-            @endif
+       
         </td>
     </tr>
     @empty
