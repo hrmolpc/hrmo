@@ -22,6 +22,7 @@ class Dashboard extends Component
     public $employmentStatusCount = [];
     public $inactiveEmploymentStatusCount = [];
     public $requests = [];
+    public $myRequests = [];
     public $userRole;
 
     public $leaveCount = 0;
@@ -62,9 +63,19 @@ class Dashboard extends Component
         $user = Auth::user();
         $this->userRole = $user->account_type;
         $this->getAllRequests(); // Fetch a
+        $this->getAllMyRequests(); // Fetch a
     }
 
 
+
+
+public function getAllMyRequests()
+{
+    // Build the query and convert the result to an array
+    $this->myRequests = collect(Request::query()
+    ->where('employee_id', auth()->user()->employee_id)
+    ->get()->toArray()); // Convert the collection to an array
+}
 
     
 
@@ -76,6 +87,10 @@ class Dashboard extends Component
         // Get the start and end of that day in Asia/Manila timezone
         $startOfDay = $dateToFilter->startOfDay();
         $endOfDay = $dateToFilter->endOfDay();
+
+        
+        $this->myRequests = Request::query()
+        ->where('employee_id', auth()->user()->employee_id);
     
         // Log the values to see what the start and end of the day look like
        // dd($startOfDay, $endOfDay);
@@ -251,6 +266,7 @@ class Dashboard extends Component
     {
         return view('livewire.dashboard', [
             'requests' => $this->requests,
+            'myRequest' => $this->myRequests,
             'leaveCount' => $this->leaveCount,
             'coeCount' => $this->coeCount,
             'serviceRecords' => $this->serviceRecords,

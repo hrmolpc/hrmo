@@ -346,21 +346,24 @@
                                 </tr>
                             </thead>
                             <tbody class="table-border-bottom-0">
-                                @forelse($requests as $request)
+                                @forelse($myRequests as $request)
                                     <tr>
-                                        <td><strong>{{ $request->id }}</strong></td>
-                                        <td class="td">{{ $request->type }}</td>
-                                        <td style="text-align: center">{{ $request->created_at->format('m/d/Y') }}</td>
-                                        <td style="text-align: center">{{ $request->status }}</td>
+                                        <td><strong>{{ $request['id'] }}</strong></td>
+                                        <td class="td">{{ $request['type'] }}</td>
+            
+
+                                        <td style="text-align: center">{{ \Carbon\Carbon::parse($request['created_at'])->format('m/d/Y') }}</td>
+                                        <td style="text-align: center">{{ $request['status'] }}</td>
                                         <td style="text-align: center">
                                             <!-- Actions -->
-                                            <button type="button" class="btn btn-sm btn-tr rounded-pill btn-icon btn-outline-secondary waves-effect" data-bs-toggle="modal" data-bs-target="#viewRequestModal{{ $request->id }}">
-                                                <span class="ti ti-eye"></span>
-                                            </button>
+                                            <button type="button" class="btn btn-sm btn-tr rounded-pill btn-icon btn-outline-secondary waves-effect" data-bs-toggle="modal" data-bs-target="#viewRequestModal{{ $request['id'] }}">
+    <span class="ti ti-eye"></span>
+</button>
 
-                                            <button type="button" wire:click="confirmDestroyRequest({{ $request->id }})" class="btn btn-sm btn-tr rounded-pill btn-icon btn-outline-danger waves-effect" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ $request->id }}">
-                                                <span class="ti ti-trash"></span>
-                                            </button>
+<button type="button" wire:click="confirmDestroyRequest({{ $request['id'] }})" class="btn btn-sm btn-tr rounded-pill btn-icon btn-outline-danger waves-effect" data-bs-toggle="modal" data-bs-target="#delete">
+    <span class="ti ti-trash"></span>
+</button>
+
                                         </td>
                                     </tr>
                                 @empty
