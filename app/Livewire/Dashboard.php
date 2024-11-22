@@ -215,6 +215,8 @@ public function getAllMyRequests()
             }
     
             // Reset the confirmedId after deletion
+
+            return redirect()->to(request()->header('Referer'));
             $this->confirmedId = null;
         } else {
             Log::error('Confirmed ID is null', ['confirmed_id' => $this->confirmedId]);

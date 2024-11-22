@@ -360,10 +360,9 @@
     <span class="ti ti-eye"></span>
 </button>
 
-<button type="button" wire:click="confirmDestroyRequest({{ $request['id'] }})" class="btn btn-sm btn-tr rounded-pill btn-icon btn-outline-danger waves-effect" data-bs-toggle="modal" data-bs-target="#delete">
+<button type="button" wire:click="confirmDestroyRequest({{ $request['id'] }})" class="btn btn-sm btn-tr rounded-pill btn-icon btn-outline-danger waves-effect" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ $request['id'] }}">
     <span class="ti ti-trash"></span>
 </button>
-
                                         </td>
                                     </tr>
                                 @empty
@@ -679,6 +678,54 @@
         </div>
     </div>
 </div>
+<div class="modal fade" id="deleteModal-{{ $request->id }}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-danger text-white py-3">
+                <div class="d-flex align-items-center">
+                    <span class="badge bg-light text-danger me-3">Confirm Deletion</span>
+                    <h5 class="modal-title" id="deleteModalLabel">Delete Request</h5>
+                </div>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-4">
+                    <div class="col-12">
+                        <div class="card border-0">
+                            <div class="card-body">
+                                <div class="alert alert-danger border-0" role="alert">
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-trash me-3 fs-4"></i>
+                                        <p class="mb-0">Are you sure you want to permanently delete this request?</p>
+                                    </div>
+                                </div>
+                                <ul class="list-unstyled mt-3">
+                                    <li class="mb-2">
+                                        <span class="fw-bold text-muted me-2"><i class="bi bi-person me-1"></i>Request Type:</span>
+                                        {{ $request->type }}
+                                    </li>
+                                    <li class="mb-2">
+                                        <span class="fw-bold text-muted me-2"><i class="bi bi-calendar-check me-1"></i>Request Date:</span>
+                                        {{ \Carbon\Carbon::parse($request->created_at)->format('F j, Y') }}
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="bi bi-x-circle me-2"></i>Cancel
+                </button>
+                <button type="button" class="btn btn-danger" wire:click.prevent="destroyRequest" data-bs-dismiss="modal">
+                    <i class="bi bi-trash me-2"></i>Delete
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @endforeach
 
 
