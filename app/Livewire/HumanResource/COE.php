@@ -12,6 +12,9 @@ use Illuminate\Support\Facades\Mail;
 
 class COE extends Component
 {
+    public $confirmedId = null; // Store confirmed request ID for deletion
+
+
     public function mount()
     {
     }
@@ -71,17 +74,37 @@ class COE extends Component
     public function confirmDestroyRequest($requestId)
     {
         $this->confirmedId = $requestId;
+        Log::info('Confirmed request ID for deletion', ['request_id' => $this->confirmedId]);  // Log to verify
+    
     }
 
     public function destroyRequest()
     {
-        $request = Request::find($this->confirmedId);
-        if ($request) {
-            $request->delete();
-            session()->flash('message', 'Request deleted!');
+        // Log the method entry
+        Log::info('Entered destroyRequest method', ['confirmed_id' => $this->confirmedId]);
+    
+        // Perform the deletion only if confirmedId is not null
+        if ($this->confirmedId) {
+            $request = Request::find($this->confirmedId);
+            
+            // If the request is found, delete it
+            if ($request) {
+                Log::info('Deleting request', ['request_id' => $request->id]);
+                $request->delete();
+                session()->flash('message', 'Request deleted!');
+            } else {
+                // Log if the request is not found
+                Log::error('Request not found for deletion', ['request_id' => $this->confirmedId]);
+                session()->flash('error', 'Request not found.');
+            }
+    
+            // Reset the confirmedId after deletion
+            $this->confirmedId = null;
+        } else {
+            Log::error('Confirmed ID is null', ['confirmed_id' => $this->confirmedId]);
         }
-        $this->confirmedId = null; // Reset the confirmedId after deletion
     }
+    
 
     public function render()
     {

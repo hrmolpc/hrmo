@@ -1,42 +1,44 @@
 <?php
 namespace App\Livewire\HumanResource;
 
+use App\Models\Employee;
+use App\Mail\RequestNotification; // Correct import
+use App\Mail\RejectedRequestNotification; // Correct import
 use Livewire\Component;
 use App\Models\Request; // Import Request model
 use Livewire\WithPagination;
-use Illuminate\Support\Facades\Log; 
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 
 class Leave extends Component
 {
-    use WithPagination;
+    public $confirmedId = null; // Store confirmed request ID for deletion
 
-    public $confirmedId = null; // To track which request is being deleted
-    public $employeeInfo = ['firstName' => ''];
-    public $requestDate = ''; // For filtering by request date
-    public $statusFilter = ''; // For filtering by status
-    public $searchTerm = ''; // For search by employee name
 
     public function mount()
     {
     }
-
-    public function getEmployeeName($employeeId)
+    public function getEmployeeName($id)
     {
- 
-        $employee = \App\Models\Employee::find($employeeId);
+        // Try using 'where' to match by the 'id' column
+        $employee = \App\Models\Employee::where('employee_id', $id)->first();
     
-        // Log whether the employee was found or not
+        // Log the retrieval attempt
+        Log::info('Employee retrieval attempt', ['employee_id' => $id, 'found' => $employee ? true : false]);
+    
+        // If the employee is found, return the full name or short name
         if ($employee) {
-            // Combine first name and last name to create full name
             $fullName = $employee->first_name . ' ' . $employee->last_name;
-           
+       
             return $fullName;
-        } else {
-            return 'Unknown Employee';
         }
+    
+        // If the employee is not found, return a default name
+        return 'Unknown Employee';
     }
+    
+    
 
-    // Approve Request: Change status to Completed
     public function approveRequest($requestId)
     {
         $request = Request::find($requestId);
@@ -44,10 +46,15 @@ class Leave extends Component
             $request->status = 'Approved';
             $request->save();
             session()->flash('message', 'Request approved!');
+
+
+            $employeeFullName = $this->getEmployeeName($request->employee_id);
+            session()->flash('message', "Request approved for $employeeFullName!");
+
+            Mail::to('dab.olarte@gmail.com')->send(new RequestNotification($request));
         }
     }
 
-    // Reject Request: Change status to Rejected
     public function rejectRequest($requestId)
     {
         $request = Request::find($requestId);
@@ -55,37 +62,53 @@ class Leave extends Component
             $request->status = 'Rejected';
             $request->save();
             session()->flash('message', 'Request rejected!');
+
+            $employeeFullName = $this->getEmployeeName($request->employee_id);
+            session()->flash('message', "Request rejected for $employeeFullName!");
+
+            Mail::to('dab.olarte@gmail.com')->send(new RejectedRequestNotification($request));
         }
     }
 
-    // Confirm Request Deletion
+
     public function confirmDestroyRequest($requestId)
     {
         $this->confirmedId = $requestId;
+        Log::info('Confirmed request ID for deletion', ['request_id' => $this->confirmedId]);  // Log to verify
+    
     }
 
-    // Delete Request
     public function destroyRequest()
     {
-        $request = Request::find($this->confirmedId);
-        if ($request) {
-            $request->delete();
-            session()->flash('message', 'Request deleted!');
+        // Log the method entry
+        Log::info('Entered destroyRequest method', ['confirmed_id' => $this->confirmedId]);
+    
+        // Perform the deletion only if confirmedId is not null
+        if ($this->confirmedId) {
+            $request = Request::find($this->confirmedId);
+            
+            // If the request is found, delete it
+            if ($request) {
+                Log::info('Deleting request', ['request_id' => $request->id]);
+                $request->delete();
+                session()->flash('message', 'Request deleted!');
+            } else {
+                // Log if the request is not found
+                Log::error('Request not found for deletion', ['request_id' => $this->confirmedId]);
+                session()->flash('error', 'Request not found.');
+            }
+    
+            // Reset the confirmedId after deletion
+            $this->confirmedId = null;
+        } else {
+            Log::error('Confirmed ID is null', ['confirmed_id' => $this->confirmedId]);
         }
-        $this->confirmedId = null; // Reset the confirmedId after deletion
     }
-
-    // Render method to fetch requests with applied filters
-    public function render()
-    {
-        $requests = Request::query();
-
-        $requests = Request::query()
-        ->where('type', 'Leave'); // Filter by type
-
     
 
-        $requests = $requests->paginate(10); // Paginate results
+    public function render()
+    {
+        $requests = Request::query()->where('type', 'Leave')->paginate(10); // Filter by type
 
         return view('livewire.human-resource.leave', [
             'requests' => $requests,

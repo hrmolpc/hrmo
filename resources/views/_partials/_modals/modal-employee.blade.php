@@ -103,7 +103,7 @@
                                     <option value="regular">{{ __('Regular') }}</option>               
                                     <option value="part_time">{{ __('Part Time') }}</option>               
                                     <option value="job_order">{{ __('Job Order') }}</option>               
-                                    <option value="volunteer">{{ __('Volunteer') }}</option>               
+                                    <option value="casual">{{ __('Casual') }}</option>               
                                     <option value="consultant">{{ __('Consultant') }}</option>               
                                     <option value="contract_service">{{ __('Contract Service') }}</option>             
                                 </select>           

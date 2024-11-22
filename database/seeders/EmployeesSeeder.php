@@ -23,7 +23,7 @@ class EmployeesSeeder extends Seeder
             'nationality' => $faker->country,
             'address' => $faker->address,
             'employee_id' => '1', // Ensure the first employee has employee_id = 1
-            'employment_status' => $faker->randomElement(['regular', 'part_time', 'job_order', 'volunteer', 'consultant', 'contract_service']),
+            'employment_status' => $faker->randomElement(['regular', 'part_time', 'job_order', 'casual', 'consultant', 'contract_service']),
             'start_date' => $faker->date(),
             'position' => $faker->jobTitle,
             'department' => $faker->word,
@@ -53,7 +53,7 @@ class EmployeesSeeder extends Seeder
                 'nationality' => $faker->country,
                 'address' => $faker->address,
                 'employee_id' => $faker->unique()->numerify('EMP####'),
-                'employment_status' => $faker->randomElement(['regular', 'part_time', 'job_order', 'volunteer', 'consultant', 'contract_service']),
+                'employment_status' => $faker->randomElement(['regular', 'part_time', 'job_order', 'casual', 'consultant', 'contract_service']),
                 'start_date' => $faker->date(),
                 'position' => $faker->jobTitle,
                 'department' => $faker->word,

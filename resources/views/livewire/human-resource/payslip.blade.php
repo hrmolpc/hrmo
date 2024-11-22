@@ -11,7 +11,7 @@
                 <a href="{{ route('dashboard') }}">Dashboard</a>
             </li>
             <li class="breadcrumb-item active">Human Resource</li>
-            <li class="breadcrumb-item active">Payslip Requests</li>
+            <li class="breadcrumb-item active">Payslip</li>
         </ol>
     </nav>
 
@@ -41,7 +41,7 @@
                                             <td><strong>{{ $request->id }}</strong></td>
                                             <td class="td">{{ $this->getEmployeeName($request->employee_id) }}</td>
                                             <td style="text-align: center">{{ \Carbon\Carbon::parse($request->created_at)->format('F j, Y') }}</td>
-
+                                       
                                             <td style="text-align: center">{{ $request->status }}</td>
                                             <td style="text-align: center">
                                                 <!-- View Button -->
@@ -58,9 +58,10 @@
                                                 @endif
 
                                                 <!-- Delete Button -->
-                                                <button type="button" class="btn btn-sm btn-tr rounded-pill btn-icon btn-outline-danger waves-effect" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ $request->id }}">
+                                                <button type="button" wire:click="confirmDestroyRequest({{ $request->id }})" class="btn btn-sm btn-tr rounded-pill btn-icon btn-outline-danger waves-effect" data-bs-toggle="modal" data-bs-target="#deleteModal-{{ $request->id }}">
                                                     <span class="ti ti-trash"></span>
                                                 </button>
+ 
                                             </td>
                                         </tr>
 
@@ -81,7 +82,7 @@
                         <div class="card border-0 h-100">
                             <div class="card-body">
                                 <h6 class="card-title text-muted mb-3">
-                                  Request Information
+                                    Request Information
                                 </h6>
                                 <ul class="list-unstyled">
                                     <li class="mb-2">
@@ -133,49 +134,50 @@
                                 <h6 class="card-title text-muted mb-3">
                                     <i class="bi bi-paperclip me-2"></i>Attachments
                                 </h6>
-                                @if($request->attachments && count($request->attachments) > 0)
-                                    <div class="list-group">
-                                        @foreach($request->attachments as $attachment)
-                                            <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
-                                                <div class="d-flex align-items-center">
-                                                    <i class="bi 
-                                                        @switch(pathinfo($attachment->file_name, PATHINFO_EXTENSION))
-                                                            @case('pdf') bi-file-pdf text-danger @break
-                                                            @case('doc')
-                                                            @case('docx') bi-file-word text-primary @break
-                                                            @case('xls')
-                                                            @case('xlsx') bi-file-excel text-success @break
-                                                            @case('jpg')
-                                                            @case('jpeg')
-                                                            @case('png')
-                                                            @case('gif') bi-file-image text-info @break
-                                                            @default bi-file text-secondary
-                                                        @endswitch
-                                                    me-3 fs-4"></i>
-                                                    <span>{{ $attachment->file_name }}</span>
-                                                </div>
-                                                <div class="btn-group" role="group">
-                                                    <a href="{{ route('download.attachment', $attachment->id) }}" 
-                                                       class="btn btn-sm btn-outline-primary" 
-                                                       title="Download">
-                                                        <i class="bi bi-download"></i>
-                                                    </a>
-                                                    <button 
-                                                        onclick="window.open('{{ route('view.attachment', $attachment->id) }}', '_blank')" 
-                                                        class="btn btn-sm btn-outline-secondary" 
-                                                        title="View">
-                                                        <i class="bi bi-eye"></i>
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                @else
-                                    <div class="alert alert-light text-muted text-center" role="alert">
-                                        <i class="bi bi-exclamation-circle me-2"></i>
-                                        No attachments found
-                                    </div>
-                                @endif
+                                @if ($request->requestor_attachment)
+                <div class="list-group mb-3">
+                    <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                        <div class="d-flex align-items-center">
+                            <i class="bi 
+                                @switch(pathinfo($request->requestor_attachment, PATHINFO_EXTENSION))
+                                    @case('pdf') bi-file-pdf text-danger @break
+                                    @case('doc') 
+                                    @case('docx') bi-file-word text-primary @break
+                                    @case('xls') 
+                                    @case('xlsx') bi-file-excel text-success @break
+                                    @case('jpg') 
+                                    @case('jpeg') 
+                                    @case('png') 
+                                    @case('gif') bi-file-image text-info @break
+                                    @default bi-file text-secondary
+                                @endswitch
+                            me-3 fs-4"></i>
+                            <span>{{ basename($request->requestor_attachment) }}</span>
+                        </div>
+                        <div class="btn-group" role="group">
+                            <a href="{{ route('download.attachment', $request->id) }}" 
+                               class="btn btn-sm btn-outline-primary" 
+                               title="Download">
+                                <i class="bi bi-download">Download</i>
+                            </a>
+                            <button 
+                                onclick="window.open('{{ route('view.attachment', $request->id) }}', '_blank')" 
+                                class="btn btn-sm btn-outline-secondary" 
+                                title="View">
+                                <i class="bi bi-eye">View</i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            @endif
+ 
+
+            {{-- No Attachments --}}
+            @if (!$request->requestor_attachment && (!$request->attachments || $request->attachments->count() === 0))
+                <div class="alert alert-light text-muted text-center" role="alert">
+                    <i class="bi bi-exclamation-circle me-2"></i>No attachments found.
+                </div>
+            @endif
                             </div>
                         </div>
                     </div>
@@ -196,11 +198,8 @@
         <div class="modal-content border-0 shadow-lg">
             <div class="modal-header bg-primary text-white py-3">
                 <div class="d-flex align-items-center">
-                <div class="d-flex align-items-center">
                     <span class="badge bg-light text-danger me-3">Confirm Action</span>
                     <h5 class="modal-title" id="deleteModalLabel">Approve / Reject Request</h5>
-                </div>
-               
                 </div>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -233,6 +232,19 @@
                                         {{ \Carbon\Carbon::parse($request->created_at)->format('F j, Y') }}
                                     </li>
                                 </ul>
+
+                                <!-- Comment Section -->
+                                <div class="mb-3">
+                                    <label for="approverComment" class="form-label"><i class="bi bi-pencil me-1"></i>Notes:</label>
+                                    <textarea class="form-control" id="approverComment" rows="3" placeholder="Enter your notes here..."></textarea>
+                                </div>
+
+                                <!-- Attachment Section -->
+                                <div class="mb-3">
+                                    <label for="approverAttachment" class="form-label"><i class="bi bi-paperclip me-1"></i>Attachment:</label>
+                                    <input class="form-control" type="file" id="approverAttachment">
+                                </div>
+
                             </div>
                         </div>
                     </div>
@@ -242,16 +254,17 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                     <i class="bi bi-x-circle me-2"></i>Cancel
                 </button>
-                <button type="button" class="btn btn-success" wire:click.prevent="approveRequest({{ $request->id }})" data-bs-dismiss="modal">
+                <button type="button" class="btn btn-success" wire:click.prevent="approveRequest({{ $request->id }}, document.getElementById('approverComment').value, document.getElementById('approverAttachment').files[0])" data-bs-dismiss="modal">
                     <i class="bi bi-check-circle me-2"></i>Approve
                 </button>
-                <button type="button" class="btn btn-danger" wire:click.prevent="rejectRequest({{ $request->id }})" data-bs-dismiss="modal">
+                <button type="button" class="btn btn-danger" wire:click.prevent="rejectRequest({{ $request->id }}, document.getElementById('approverComment').value, document.getElementById('approverAttachment').files[0])" data-bs-dismiss="modal">
                     <i class="bi bi-x-circle me-2"></i>Reject
                 </button>
             </div>
         </div>
     </div>
 </div>
+
 
                                         <!-- Delete Modal -->
                                         <div class="modal fade" id="deleteModal-{{ $request->id }}" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
@@ -294,13 +307,15 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                     <i class="bi bi-x-circle me-2"></i>Cancel
                 </button>
-                <button type="button" class="btn btn-danger" wire:click.prevent="destroyRequest({{ $request->id }})" data-bs-dismiss="modal">
-                    <i class="bi bi-trash me-2"></i>Delete
-                </button>
+                <!-- This button calls the method to confirm deletion -->
+                <button type="button" class="btn btn-danger" wire:click.prevent="destroyRequest" data-bs-dismiss="modal">
+    <i class="bi bi-trash me-2"></i>Delete
+</button>
             </div>
         </div>
     </div>
 </div>
+
 
                                     @empty
                                         <tr>
