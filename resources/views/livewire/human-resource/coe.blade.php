@@ -42,11 +42,12 @@
                                             <td><strong>{{ $request->id }}</strong></td>
                                             <td class="td">{{ $this->getEmployeeName($request->employee_id) }}</td>
                                             <td style="text-align: center">{{ \Carbon\Carbon::parse($request->created_at)->format('F j, Y') }}</td>
-                                            <td style="text-align: center">{{ $request->status }}</td>
+                                            <td style="text-align: center">{{ $request->status == 'Pending' ? 'On-Process' : $request->status }}
+                                            </td>
 
                                             <td style="text-align: center">
     @if ($request['is_active'] == 0)
-        Request is pending and hasn't been viewed yet.
+        This hasn't been viewed yet.
     @elseif ($request['is_active'] == 1)
         Request has been viewed and is currently being processed (2-3 days).
     @else
@@ -111,7 +112,7 @@
                                                                                         @default bg-secondary
                                                                                     @endswitch
                                                                                 ">
-                                                                                    {{ $request->status }}
+                                                                                {{ $request->status == 'Pending' ? 'On-Process' : $request->status }}
                                                                                 </span>
                                                                             </li>
                                                                             <li class="mb-2">

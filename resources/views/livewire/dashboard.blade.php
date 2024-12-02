@@ -277,7 +277,10 @@
                                             <td class="td">    {{ $this->getEmployeeName($request->employee_id) }}</td>
                                             <td class="td">{{ $request->type }}</td>
                                             <td style="text-align: center">{{ $request->created_at->format('m/d/Y') }}</td>
-                                            <td style="text-align: center">{{ $request->status }}</td>
+                                            <td style="text-align: center">
+    {{ $request['status'] == 'Pending' ? 'On-Process' : $request['status'] }}
+</td>
+
                                              
                                             </td>
  
@@ -329,7 +332,10 @@
             
 
                                         <td style="text-align: center">{{ \Carbon\Carbon::parse($request['created_at'])->format('m/d/Y') }}</td>
-                                        <td style="text-align: center">{{ $request['status'] }}</td>
+                                        <td style="text-align: center">
+    {{ $request['status'] == 'Pending' ? 'On-Process' : $request['status'] }}
+</td>
+
                                         <td style="text-align: center">
     @if ($request['is_active'] == 0)
         Your request hasn't been viewed yet.
@@ -518,7 +524,7 @@
                                                 @default bg-secondary
                                             @endswitch
                                         ">
-                                            {{ $request->status }}
+                                        {{ $request->status == 'Pending' ? 'On-Process' : $request->status }}
                                         </span>
                                     </li>
                                     <li class="mb-2">
