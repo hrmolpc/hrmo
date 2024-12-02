@@ -23,7 +23,7 @@
             <div class="row mt-3">
                 <div class="col">
                     <div class="card">
-                        <h5 class="card-header">{{ __('Service Records Request') }}</h5>
+                        <h5 class="card-header">{{ __('Service Records') }}</h5>
                         <div class="table-responsive text-nowrap">
                             <table class="table table-hover">
                                 <thead>
@@ -32,6 +32,7 @@
                                         <th>{{ __('Employee') }}</th>
                                         <th style="text-align: center">{{ __('Request Date') }}</th>
                                         <th style="text-align: center">{{ __('Status') }}</th>
+                                        <th style="text-align: center"> Remarks </th>
                                         <th style="text-align: center">{{ __('Actions') }}</th>
                                     </tr>
                                 </thead>
@@ -42,7 +43,17 @@
                                             <td class="td">{{ $this->getEmployeeName($request->employee_id) }}</td>
                                             <td style="text-align: center">{{ \Carbon\Carbon::parse($request->created_at)->format('F j, Y') }}</td>
                                             <td style="text-align: center">{{ $request->status }}</td>
+
                                             <td style="text-align: center">
+    @if ($request['is_active'] == 0)
+        Request is pending and hasn't been viewed yet.
+    @elseif ($request['is_active'] == 1)
+        Request has been viewed and is currently being processed (2-3 days).
+    @else
+        Request status is currently unavailable.
+    @endif
+</td>
+<td style="text-align: center">
                                                 <!-- View Button -->
                                                 <button type="button" class="btn btn-sm btn-tr rounded-pill btn-icon btn-outline-secondary waves-effect" data-bs-toggle="modal" data-bs-target="#viewModal-{{ $request->id }}">
                                                     <span class="ti ti-eye"></span>
@@ -175,6 +186,10 @@
                                                         </div>
                                                     </div>
                                                     <div class="modal-footer bg-light">
+                                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" wire:click.prevent="viewRequest({{ $request->id }})">
+                                                            <i class="bi bi-x-circle me-2"></i>Mark as Viewed
+                                                        </button>
+                                                        
                                                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
                                                             <i class="bi bi-x-circle me-2"></i>Close
                                                         </button>

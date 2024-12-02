@@ -123,10 +123,22 @@ public function rejectRequest($requestId)
         $employeeFullName = $this->getEmployeeName($request->employee_id);
         session()->flash('message', "Request rejected for $employeeFullName!");
 
-        Mail::to($getEmpEmail)->send(new RequestNotification($request));
+        Mail::to($getEmpEmail)->send(new RejectedRequestNotification($request));
 
     
 
+        return redirect()->to(request()->header('Referer'));
+    }
+}
+
+public function viewRequest($requestId)
+{
+    $request = Request::find($requestId);
+    if ($request) {
+  
+        $request->is_active = 1;
+       
+        $request->save();
         return redirect()->to(request()->header('Referer'));
     }
 }
@@ -170,7 +182,9 @@ public function rejectRequest($requestId)
 
     public function render()
     {
-        $requests = Request::query()->where('type', 'Certificate of Employment')->paginate(10); // Filter by type
+        $requests = Request::query()->where('type', 'Certificate of Employment')
+        ->orderBy('created_at', 'desc')
+        ->paginate(10);
 
         return view('livewire.human-resource.coe', [
             'requests' => $requests,

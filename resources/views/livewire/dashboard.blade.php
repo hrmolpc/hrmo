@@ -317,6 +317,7 @@
                                     <th>{{ __('Request Type') }}</th>
                                     <th style="text-align: center">{{ __('Request Date') }}</th>
                                     <th style="text-align: center">{{ __('Status') }}</th>
+                                    <th style="text-align: center">{{ __('Remarks') }}</th>
                                     <th style="text-align: center">{{ __('Actions') }}</th>
                                 </tr>
                             </thead>
@@ -329,6 +330,16 @@
 
                                         <td style="text-align: center">{{ \Carbon\Carbon::parse($request['created_at'])->format('m/d/Y') }}</td>
                                         <td style="text-align: center">{{ $request['status'] }}</td>
+                                        <td style="text-align: center">
+    @if ($request['is_active'] == 0)
+        Your request hasn't been viewed yet.
+    @elseif ($request['is_active'] == 1)
+        Your request has been viewed. Wait for 2-3 days for processing.
+    @else
+        Status unknown.
+    @endif
+</td>
+
                                         <td style="text-align: center">
                                             <!-- Actions -->
                                             <button type="button" class="btn btn-sm btn-tr rounded-pill btn-icon btn-outline-secondary waves-effect" data-bs-toggle="modal" data-bs-target="#viewRequestModal{{ $request['id'] }}">

@@ -69,28 +69,25 @@ class Dashboard extends Component
 
 
 
-public function getAllMyRequests()
-{
-    // Build the query and convert the result to an array
-    $this->myRequests = collect(Request::query()
-    ->where('employee_id', auth()->user()->employee_id)
-    ->get()->toArray()); // Convert the collection to an array
-}
-
+    public function getAllMyRequests()
+    {
+        // Build the query, sort by 'created_at' in descending order and convert the result to an array
+        $this->myRequests = collect(Request::query()
+            ->where('employee_id', auth()->user()->employee_id)
+            ->orderBy('created_at', 'desc') // Sort by 'created_at' in descending order
+            ->get()
+            ->toArray()); // Convert the collection to an array
+    }
+    
     
 
     public function getAllRequests()
     {
         // Set the date to 2024-11-17 (testing with a past date)
-        $dateToFilter = Carbon::createFromFormat('Y-m-d', '2024-11-17', 'Asia/Manila');
-    
-        // Get the start and end of that day in Asia/Manila timezone
-        $startOfDay = $dateToFilter->startOfDay();
-        $endOfDay = $dateToFilter->endOfDay();
-
         
         $this->myRequests = Request::query()
-        ->where('employee_id', auth()->user()->employee_id);
+        ->where('employee_id', auth()->user()->employee_id)
+        ->orderBy('created_at', 'desc');
     
         // Log the values to see what the start and end of the day look like
        // dd($startOfDay, $endOfDay);
@@ -98,7 +95,9 @@ public function getAllMyRequests()
         // Fetch requests created on 2024-11-17 using the range
         $this->requests = Request::query()
             //->whereBetween('created_at', [$startOfDay, $endOfDay])
+            ->orderBy('created_at', 'desc')
             ->get();
+
 
             $this->leaveCount = Request::query()
             ->where('type', 'Leave')
@@ -162,12 +161,13 @@ public function getAllMyRequests()
                 'status' => 'Pending',
                 'date_from' => $this->dateFrom,
                 'date_to' => $this->dateTo,
-                'is_active' => true,
+                'is_active' => 0,
                 'deleted_by' => null,
                 'requestor_attachment' => $this->uploadAttachment(),
                 'approver_attachment' => null,
                 'created_at' => now(),
                 'updated_at' => now(),
+                'attachment_status' =>  '',
                 'deleted_at' => null,
             ];
     
@@ -180,7 +180,11 @@ public function getAllMyRequests()
 
             return redirect()->to(request()->header('Referer'));
         } catch (\Exception $e) {
-            session()->flash('error', 'Error submitting request. Please try again.');
+
+    
+         
+
+            return redirect()->to(request()->header('Referer'));
             logger()->error('Request submission failed: ' . $e->getMessage());
         }
     }

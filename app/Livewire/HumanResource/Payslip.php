@@ -101,7 +101,7 @@ class Payslip extends Component
             $employeeFullName = $this->getEmployeeName($request->employee_id);
             session()->flash('message', "Request rejected for $employeeFullName!");
 
-            Mail::to($getEmpEmail)->send(new RequestNotification($request));
+            Mail::to($getEmpEmail)->send(new RejectedRequestNotification($request));
             return redirect()->to(request()->header('Referer'));
         }
     }
@@ -140,10 +140,23 @@ class Payslip extends Component
         }
     }
     
+    public function viewRequest($requestId)
+{
+    $request = Request::find($requestId);
+    if ($request) {
+  
+        $request->is_active = 1;
+       
+        $request->save();
+        return redirect()->to(request()->header('Referer'));
+    }
+}
 
     public function render()
     {
-        $requests = Request::query()->where('type', 'Payslip')->paginate(10); // Filter by type
+        $requests = Request::query()->where('type', 'Payslip')
+        ->orderBy('created_at', 'desc')
+        ->paginate(10);
 
         return view('livewire.human-resource.payslip', [
             'requests' => $requests,
