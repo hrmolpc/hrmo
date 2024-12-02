@@ -1,41 +1,32 @@
 <?php
-
 namespace App\Livewire\HumanResource\Structure;
 
 use App\Models\Employee;
-use Carbon\Carbon;
-use Exception;
-use Illuminate\Support\Facades\DB;
+use App\Models\EmployeeInformationHistory;
 use Livewire\Component;
 
 class EmployeeInfo extends Component
 {
     public $employee;
-    public $isEdit = false;
+    public $history = []; // Add history variable
 
-
-    // Mount method to load employee information
     public function mount($employee_id)
     {
-        $this->employee = Employee::find($employee_id);
-        // You can load other related data if needed
+        $this->employee = Employee::where('employee_id', $employee_id)->first(); // Load by employee_id
+
+        // Load employee information history if employee is found
+        if ($this->employee) {
+            $this->history = EmployeeInformationHistory::where('employee_id', $employee_id)
+                ->orderBy('created_at', 'desc')
+                ->get();
+        }
     }
 
-    // Render method
     public function render()
     {
-        return view('livewire.human-resource.structure.employee-info');
+        return view('livewire.human-resource.structure.employee-info', [
+            'employee' => $this->employee,
+            'history' => $this->history,
+        ]);
     }
-
-    // Toggle active status of the employee
-    public function toggleActive()
-    {
-        $this->employee->is_active = !$this->employee->is_active;
-
-        $this->employee->save();
-        $this->dispatch('toastr', type: 'success', message: __('Employee status updated successfully!'));
-    }
-
-
-
 }

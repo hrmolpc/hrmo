@@ -49,4 +49,23 @@ protected $keyType = 'string';
     {
         return $this->first_name . ' ' . $this->last_name;
     }
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::updated(function ($employee) {
+            foreach ($employee->getChanges() as $field => $newValue) {
+                if ($field === 'updated_at') continue; // Skip timestamps
+
+                EmployeeInformationHistory::create([
+                    'employee_id' => $employee->employee_id,
+                    'field'       => $field,
+                    'old_value'   => $employee->getOriginal($field),
+                    'new_value'   => $newValue,
+                    'changed_by'  => 'Admin123', // ID of the user making the change
+                ]);
+            }
+        });
+    }
 }

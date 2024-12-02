@@ -66,41 +66,36 @@
         <div class="col">
             <div class="card">
                 <h5 class="card-header d-flex justify-content-between align-items-center">
-                    Employee Requests
+                    Employee's Information History
                 </h5>
-                <div class="table-responsive text-nowrap">
-                 
 
-                    <table class="table table-hover">
-                        <thead>
-                            <tr>
-                                <th class="col-1">{{ __('ID') }}</th>
-                                <th>{{ __('Request Type') }}</th>
-                                <th style="text-align: center">{{ __('Request Date') }}</th>
-                                <th style="text-align: center">{{ __('Status') }}</th>
-                                <th style="text-align: center">{{ __('Actions') }}</th>
-                            </tr>
-                        </thead>
-                        <tbody class="table-border-bottom-0">
-                            <tr>
-                                <td><strong>123</strong></td>
-                                <td class="td">Certificate of Employment</td>
-                                <td style="text-align: center">10/20/2024</td>
-                                <td style="text-align: center">Pending</td>
-                                <td style="text-align: center">
-                                    <button type="button" class="btn btn-sm btn-tr rounded-pill btn-icon btn-outline-secondary waves-effect">
-                                        <span class="ti ti-eye"></span>
-                                    </button>
-                                    <button type="button" class="btn btn-sm btn-tr rounded-pill btn-icon btn-outline-danger waves-effect">
-                                        <span class="ti ti-trash"></span>
-                                    </button>
-                                </td>
-                            </tr>
-                            <!-- Additional rows can be added here -->
-                        </tbody>
-                    </table>
-                </div>
+                @if($history->isNotEmpty())
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <th>Field</th>
+                        <th>Old Value</th>
+                        <th>New Value</th>
+                        <th>Change Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach($history as $entry)
+                        <tr>
+                            <td>{{ ucfirst($entry->field) }}</td>
+                            <td>{{ $entry->old_value }}</td>
+                            <td>{{ $entry->new_value }}</td>
+                            <td>{{ \Carbon\Carbon::parse($entry->created_at)->format('F j, Y') }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        @else
+            <div class="alert alert-info text-center">
+                No history records found for this employee.
             </div>
+        @endif
+              </div>
         </div>
     </div>
 
